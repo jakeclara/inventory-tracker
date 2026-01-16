@@ -12,31 +12,29 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "inventory_items")
+@Table(name = "inventory_item")
 public class InventoryItem {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "inventory_item_id")
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(name = "item_name", nullable = false, unique = true, length = 150)
     @NotBlank
-    @Size(min = 2, max = 150)
     private String name;
     
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "item_sku", nullable = false, unique = true, length = 50)
     @NotBlank
-    @Size(min = 2, max = 50)
     private String sku;
 
     @Column(name = "reorder_threshold", nullable = false)
     @Min(0)
     private int reorderThreshold;
 
-    @Column(length = 20)
-    @Size(max = 20)
+    @Column(name = "item_unit", length = 20)
     private String unit;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,8 +44,17 @@ public class InventoryItem {
     protected InventoryItem() {}
 
     public InventoryItem(String name, String sku, int reorderThreshold) {
-        this.name = (name == null) ? null : name.trim();
-        this.sku = (sku == null) ? null : sku.trim();
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Name cannot be blank");
+        }
+        if (sku == null || sku.isBlank()) {
+            throw new IllegalArgumentException("SKU cannot be blank");
+        }
+        if (reorderThreshold < 0) {
+            throw new IllegalArgumentException("Reorder threshold cannot be negative");
+        }
+        this.name = name.trim();
+        this.sku = sku.trim();
         this.reorderThreshold = reorderThreshold;
     }
 
@@ -58,7 +65,6 @@ public class InventoryItem {
     public String getName() {
         return name;
     }
-
 
     public String getSku() {
         return sku;
@@ -78,7 +84,7 @@ public class InventoryItem {
 
     public void rename(String newName) {
         if (newName == null || newName.isBlank()) {
-            throw new IllegalArgumentException("Name cannot be null");
+            throw new IllegalArgumentException("Name cannot be blank");
         }
         this.name = newName.trim();
     }

@@ -1,6 +1,6 @@
 package com.jakeclara.inventorytracker.model;
 
-public enum Role {
+public enum UserRole {
     ADMIN,
     USER,
 }

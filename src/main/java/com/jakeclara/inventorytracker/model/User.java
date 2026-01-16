@@ -9,33 +9,35 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "users")
+@Table(name = "app_user")
 public class User {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(unique = true, nullable = false, length = 50)
     @NotBlank
-    @Size(min = 3, max = 50)
     private String username;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(name = "user_role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @NotNull
+    private UserRole role;
 
-    @Column(nullable = false)
+    @Column(name = "is_enabled", nullable = false)
     private boolean enabled;
 
     protected User() {}
 
-    public User(String username, String passwordHash, Role role) {
+    public User(String username, String passwordHash, UserRole role) {
         if (username == null || username.isBlank()) {
             throw new IllegalArgumentException("Username cannot be blank");
         }
@@ -45,7 +47,7 @@ public class User {
         if (role == null) {
             throw new IllegalArgumentException("Role cannot be null");
         }
-
+        
         this.username = username.trim().toLowerCase();
         this.passwordHash = passwordHash;
         this.role = role;
@@ -64,7 +66,7 @@ public class User {
         return passwordHash;
     }
 
-    public Role getRole() {
+    public UserRole getRole() {
         return role;
     }
 
