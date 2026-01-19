@@ -74,4 +74,12 @@ public class User {
         return enabled;
     }
 
+    @Override
+    public String toString() {
+        return "User [id=" + id + 
+        ", username=" + username + 
+        ", role=" + role + 
+        ", enabled=" + enabled + "]";
+    }
+
 }

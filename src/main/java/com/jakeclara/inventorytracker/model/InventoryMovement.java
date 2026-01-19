@@ -127,4 +127,16 @@ public class InventoryMovement {
         this.note = (note == null) ? null : note.trim();
     }
 
+    @Override
+    public String toString() {
+        return "InventoryMovement [id=" + id + 
+        ", item=" + item + 
+        ", quantity=" + quantity + 
+        ", movementType=" + movementType + 
+        ", movementDate=" + movementDate + 
+        ", reference=" + reference + 
+        ", note=" + note + 
+        ", createdBy=" + createdBy + "]";
+    }
+
 }

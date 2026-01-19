@@ -37,6 +37,9 @@ public class InventoryItem {
     @Column(name = "item_unit", length = 20)
     private String unit;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private Instant createdAt;
@@ -56,6 +59,7 @@ public class InventoryItem {
         this.name = name.trim();
         this.sku = sku.trim();
         this.reorderThreshold = reorderThreshold;
+        this.isActive = true;
     }
 
     public Long getId() {
@@ -76,6 +80,10 @@ public class InventoryItem {
 
     public String getUnit() {
         return unit;
+    }
+
+    public boolean isActive() {
+        return isActive;
     }
 
     public Instant getCreatedAt() {
@@ -100,10 +108,18 @@ public class InventoryItem {
         this.unit = (unit == null) ? null : unit.trim();
     }
 
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     @Override
     public String toString() {
-        return "InventoryItem [id=" + id + ", name=" + name + ", sku=" + sku + ", reorderThreshold=" + reorderThreshold
-                + ", unit=" + unit + ", createdAt=" + createdAt + "]";
+        return "InventoryItem [id=" + id + 
+        ", name=" + name + 
+        ", sku=" + sku + 
+        ", reorderThreshold=" + reorderThreshold + 
+        ", unit=" + unit + 
+        ", createdAt=" + createdAt + "]";
     }
-    
+
 }
