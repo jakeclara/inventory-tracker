@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "inventory_movement")
@@ -45,9 +46,11 @@ public class InventoryMovement {
     private LocalDate movementDate;
 
     @Column(length = 100)
+    @Size(max = 100)
     private String reference;
 
     @Column(length = 255)
+    @Size(max = 255)
     private String note;
 
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
@@ -73,9 +76,6 @@ public class InventoryMovement {
         if (movementType == null) {
             throw new IllegalArgumentException("Movement type cannot be null");
         }
-        if (movementDate == null) {
-            throw new IllegalArgumentException("Movement date cannot be null");
-        }
         if (createdBy == null) {
             throw new IllegalArgumentException("Created by cannot be null");
         }
@@ -83,7 +83,7 @@ public class InventoryMovement {
         this.item = item;
         this.quantity = quantity;
         this.movementType = movementType;
-        this.movementDate = movementDate;
+        this.movementDate = validateMovementDate(movementDate);
         this.createdBy = createdBy;
     }
 
@@ -120,11 +120,32 @@ public class InventoryMovement {
     }
 
     public void setReference(String reference) {
-        this.reference = (reference == null) ? null : reference.trim();
+        this.reference = validateAndTrimOptional(reference, 100, "Reference");
     }
 
     public void setNote(String note) {
-        this.note = (note == null) ? null : note.trim();
+        this.note = validateAndTrimOptional(note, 255, "Note");
+    }
+
+    private String validateAndTrimOptional(String value, int maxLength, String fieldName) {
+        if (value == null) return null;
+        
+        String trimmed = value.trim();
+        if (trimmed.length() > maxLength) {
+            throw new IllegalArgumentException(fieldName + " cannot exceed " + maxLength + " characters");
+        }
+        
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private LocalDate validateMovementDate(LocalDate movementDate) {
+        if (movementDate == null) {
+            throw new IllegalArgumentException("Movement date cannot be null");
+        }
+        if (movementDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Movement date cannot be in the future");
+        }
+        return movementDate;
     }
 
     @Override

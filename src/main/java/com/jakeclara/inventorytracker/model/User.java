@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "app_user")
@@ -22,6 +23,7 @@ public class User {
 
     @Column(unique = true, nullable = false, length = 50)
     @NotBlank
+    @Size(max = 50)
     private String username;
 
     @Column(name = "password_hash", nullable = false, length = 255)
@@ -38,9 +40,6 @@ public class User {
     protected User() {}
 
     public User(String username, String passwordHash, UserRole role) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Username cannot be blank");
-        }
         if (passwordHash == null || passwordHash.isBlank()) {
             throw new IllegalArgumentException("Password hash cannot be blank");
         }
@@ -48,7 +47,7 @@ public class User {
             throw new IllegalArgumentException("Role cannot be null");
         }
         
-        this.username = username.trim().toLowerCase();
+        this.username = validateUsername(username);
         this.passwordHash = passwordHash;
         this.role = role;
         this.enabled = true;
@@ -72,6 +71,17 @@ public class User {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    private String validateUsername(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("Username cannot be blank");
+        }
+        String trimmedUsername = username.trim().toLowerCase();
+        if (trimmedUsername.length() > 50) {
+            throw new IllegalArgumentException("Username cannot exceed 50 characters");
+        }
+        return trimmedUsername;
     }
 
     @Override
