@@ -28,6 +28,7 @@ public class InventoryItemController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public InventoryItem createInventoryItem(@RequestBody InventoryItem item) {
         return inventoryItemService.createInventoryItem(item);
     }
@@ -50,6 +51,7 @@ public class InventoryItemController {
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateInventoryItem(
         @PathVariable Long id, 
         @RequestBody InventoryItem updatedItem

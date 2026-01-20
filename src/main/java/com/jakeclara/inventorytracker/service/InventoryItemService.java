@@ -43,7 +43,7 @@ public class InventoryItemService {
 
     public InventoryItem getInventoryItemById(Long id) {
         return inventoryItemRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Inventory item not found" + id));
+        .orElseThrow(() -> new EntityNotFoundException("Inventory item not found " + id));
     }
     
 }
