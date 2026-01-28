@@ -4,7 +4,7 @@ import java.util.List;
 
 public record InventoryDashboardResponse (
     List<InventoryDashboardItem> inventoryItems,
-    Long lowStockCount
+    long lowStockCount
 ){
     
 }

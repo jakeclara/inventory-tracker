@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import com.jakeclara.inventorytracker.dto.CreateInventoryMovementRequest;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
-import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 import com.jakeclara.inventorytracker.repository.InventoryMovementRepository;
-import com.jakeclara.inventorytracker.repository.UserRepository;
-
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 

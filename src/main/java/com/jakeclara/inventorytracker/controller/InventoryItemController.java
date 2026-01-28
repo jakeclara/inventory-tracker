@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jakeclara.inventorytracker.dto.InventoryDashboardResponse;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,22 @@ public class InventoryItemController {
         this.inventoryItemService = inventoryItemService;
     }
 
+    @GetMapping("/dashboard")
+    public InventoryDashboardResponse getInventoryDashboard() {
+        return inventoryItemService.getInventoryDashboard();
+    }
+
+    /***
+    @GetMapping("/dashboard")
+    public String getInventoryDashboard(Model model) {
+        InventoryDashboardResponse viewData = inventoryItemService.getInventoryDashboard();
+        
+        model.addAttribute("items", viewData.inventoryItems());
+        model.addAttribute("lowStockCount", viewData.lowStockCount());
+        
+        return "dashboard";
+    }
+    **/
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InventoryItem createInventoryItem(@RequestBody InventoryItem item) {

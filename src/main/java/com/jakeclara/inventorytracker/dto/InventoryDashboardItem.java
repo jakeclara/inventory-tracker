@@ -4,9 +4,11 @@ public record InventoryDashboardItem (
     Long id,
     String name,
     String sku,
-    int currentQuantity,
-    String unit,
-    boolean lowStock
+    Long currentQuantity,
+    int reorderThreshold,
+    String unit
 ) {
-    
+    public boolean lowStock() {
+        return currentQuantity < reorderThreshold;
+    }    
 }
