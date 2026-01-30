@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RestController
-@RequestMapping("/movements")
+@RequestMapping("/items/{itemId}/movements")
 public class InventoryMovementController {
     
     private final InventoryMovementService inventoryMovementService;
@@ -27,8 +27,11 @@ public class InventoryMovementController {
     }
     
     @PostMapping
-    public ResponseEntity<Long> createInventoryMovement(@RequestBody CreateInventoryMovementRequest request) {
-        Long id = inventoryMovementService.createInventoryMovement(request);
+    public ResponseEntity<Long> createInventoryMovement(
+        @PathVariable Long itemId, 
+        @RequestBody CreateInventoryMovementRequest request
+    ) {
+        Long id = inventoryMovementService.createInventoryMovement(itemId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 

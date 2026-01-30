@@ -2,23 +2,23 @@ package com.jakeclara.inventorytracker.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.jakeclara.inventorytracker.dto.InventoryDashboardResponse;
+import com.jakeclara.inventorytracker.dto.CreateInventoryItemRequest;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 
 
 
-@RestController
+@Controller
 @RequestMapping("/items")
 public class InventoryItemController {
     
@@ -28,26 +28,17 @@ public class InventoryItemController {
         this.inventoryItemService = inventoryItemService;
     }
 
-    @GetMapping("/dashboard")
-    public InventoryDashboardResponse getInventoryDashboard() {
-        return inventoryItemService.getInventoryDashboard();
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("item", new CreateInventoryItemRequest());
+        model.addAttribute("mode", "create");
+        return "/items/item-form";
     }
 
-    /***
-    @GetMapping("/dashboard")
-    public String getInventoryDashboard(Model model) {
-        InventoryDashboardResponse viewData = inventoryItemService.getInventoryDashboard();
-        
-        model.addAttribute("items", viewData.inventoryItems());
-        model.addAttribute("lowStockCount", viewData.lowStockCount());
-        
-        return "dashboard";
-    }
-    **/
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public InventoryItem createInventoryItem(@RequestBody InventoryItem item) {
-        return inventoryItemService.createInventoryItem(item);
+    public String createInventoryItem(@ModelAttribute CreateInventoryItemRequest request) {
+        Long itemId = inventoryItemService.createInventoryItem(request);
+        return "redirect:/items/" + itemId;
     }
 
     @GetMapping("/{id}")
@@ -55,16 +46,16 @@ public class InventoryItemController {
         return inventoryItemService.getInventoryItemById(id);
     }
 
-    @PatchMapping("/{id}/deactivate")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivateInventoryItem(@PathVariable Long id) {
-        inventoryItemService.deactivateInventoryItem(id);
+    @PostMapping("/{itemId}/deactivate")
+    public String deactivateInventoryItem(@PathVariable Long itemId) {
+        inventoryItemService.deactivateInventoryItem(itemId);
+        return "redirect:/items/" + itemId;
     }
-
-    @PatchMapping("/{id}/activate")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void reactivateInventoryItem(@PathVariable Long id) {
-        inventoryItemService.reactivateInventoryItem(id);
+    
+    @PostMapping("/{itemId}/activate")
+    public String reactivateInventoryItem(@PathVariable Long itemId) {
+        inventoryItemService.reactivateInventoryItem(itemId);
+        return "redirect:/items/" + itemId;
     }
 
     @PutMapping("/{id}")

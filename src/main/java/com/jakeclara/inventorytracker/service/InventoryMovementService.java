@@ -28,25 +28,27 @@ public class InventoryMovementService {
     }
 
     @Transactional
-    public Long createInventoryMovement(CreateInventoryMovementRequest request) {
+    public Long createInventoryMovement(Long itemId, CreateInventoryMovementRequest request) {
 
-        InventoryItem inventoryItem = inventoryItemService.getInventoryItemById(request.getInventoryItemId());
-        User createdBy = userService.getUserById(request.getCreatedByUserId());
+        InventoryItem inventoryItem = inventoryItemService.getInventoryItemById(itemId);
+
+        // TEMPORARY hardcoded user until auth is implemented
+        User createdBy = userService.getUserById(1L);
 
         InventoryMovement newMovement = new InventoryMovement(
             inventoryItem,
-            request.getQuantity(),
-            request.getMovementType(),
-            request.getMovementDate(),
+            request.quantity(),
+            request.movementType(),
+            request.movementDate(),
             createdBy
         );
 
-        if (request.getNote() != null) {
-            newMovement.setNote(request.getNote());
+        if (request.note() != null) {
+            newMovement.setNote(request.note());
         }
 
-        if (request.getReference() != null) {
-            newMovement.setReference(request.getReference());
+        if (request.reference() != null) {
+            newMovement.setReference(request.reference());
         }
 
         inventoryMovementRepository.save(newMovement);
