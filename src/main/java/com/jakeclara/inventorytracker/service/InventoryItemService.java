@@ -2,7 +2,8 @@ package com.jakeclara.inventorytracker.service;
 
 import org.springframework.stereotype.Service;
 
-import com.jakeclara.inventorytracker.dto.CreateInventoryItemRequest;
+import com.jakeclara.inventorytracker.dto.InventoryItemForm;
+import com.jakeclara.inventorytracker.dto.InventoryItemDetails;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 
@@ -19,40 +20,52 @@ public class InventoryItemService {
     }
 
     @Transactional
-    public Long createInventoryItem(CreateInventoryItemRequest request) {
+    public Long createInventoryItem(InventoryItemForm form) {
         InventoryItem newItem = new InventoryItem(
-            request.name(),
-            request.sku(),
-            request.reorderThreshold()
+            form.getName(),
+            form.getSku(),
+            form.getReorderThreshold()
         );
-        newItem.setUnit(request.unit());
+        newItem.setUnit(form.getUnit());
 
         return inventoryItemRepository.save(newItem).getId();
     }
 
     @Transactional
-    public void deactivateInventoryItem(Long id) {
-        InventoryItem item = getInventoryItemById(id);
+    public void deactivateInventoryItem(Long itemID) {
+        InventoryItem item = getInventoryItemById(itemID);
         item.setIsActive(false);
     }
 
     @Transactional
-    public void reactivateInventoryItem(Long id) {
-        InventoryItem item = getInventoryItemById(id);
+    public void activateInventoryItem(Long itemID) {
+        InventoryItem item = getInventoryItemById(itemID);
         item.setIsActive(true);
     }
 
     @Transactional
-    public void updateInventoryItem(Long id, InventoryItem updatedItem) {
-        InventoryItem existingItem = getInventoryItemById(id);
-        existingItem.rename(updatedItem.getName());
-        existingItem.updateReorderThreshold(updatedItem.getReorderThreshold());
-        existingItem.setUnit(updatedItem.getUnit());
+    public void updateInventoryItem(Long itemID, InventoryItemForm editForm) {
+        InventoryItem existingItem = getInventoryItemById(itemID);
+        existingItem.rename(editForm.getName());
+        existingItem.updateReorderThreshold(editForm.getReorderThreshold());
+        existingItem.setUnit(editForm.getUnit());
     }
 
-    public InventoryItem getInventoryItemById(Long id) {
-        return inventoryItemRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Inventory item not found " + id));
+    public InventoryItem getInventoryItemById(Long itemId) {
+        return inventoryItemRepository.findById(itemId)
+        .orElseThrow(() -> new EntityNotFoundException("Inventory item not found " + itemId));
+    }
+
+    public Long getCurrentQuantity(Long itemId) {
+        return inventoryItemRepository.findCurrentQuantityByItemId(itemId);
+    }
+    
+    public InventoryItemDetails getItemDetails(Long itemId) {
+        InventoryItem item = getInventoryItemById(itemId);
+        return InventoryItemDetails.from(
+            item, 
+            getCurrentQuantity(itemId)
+        );
     }
     
 }

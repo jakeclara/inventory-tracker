@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
 import com.jakeclara.inventorytracker.model.InventoryItem;
@@ -38,5 +39,25 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
         ORDER BY item.name ASC
     """)
     List<InventoryDashboardItem> findActiveInventoryWithQuantity();
+
+    /**
+     * Find the current quantity of the inventory item with the given id.
+     * 
+     * @param itemId the id of the inventory item
+     * @return the current quantity of the inventory item
+     */
+    @Query("""
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN movement.movementType IN('SALE', 'ADJUST_OUT')
+                THEN -movement.quantity
+                ELSE movement.quantity
+            END
+        ), 0)
+        FROM InventoryMovement movement
+        WHERE movement.item.id = :itemId
+    """)
+    Long findCurrentQuantityByItemId(@Param("itemId") Long itemId);
     
 }
+

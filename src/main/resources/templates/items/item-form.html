@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${mode == 'create' ? 'Add New Item' : 'Edit Item'}">Item Form</title>
+</head>
+<body>
+    <h1 th:text="${mode == 'create'} ? 'Add New Item' : ${'Edit Item: ' + itemDetails.name}">Item Form</h1>
+    
+    <form th:if="${mode == 'create'}" th:action="@{/items}" th:object="${item}" method="post">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" th:field="*{name}" />
+        </div>
+        <div>
+            <label for="sku">SKU:</label>
+            <input type="text" id="sku" th:field="*{sku}" />
+        </div>
+        <div>
+            <label for="reorderThreshold">Reorder Threshold:</label>
+            <input type="number" id="reorderThreshold" th:field="*{reorderThreshold}" />
+        </div>
+        <div>
+            <label for="unit">Unit:</label>
+            <input type="text" id="unit" th:field="*{unit}" />
+        </div>
+        <div>
+            <button type="submit">Add Item</button>
+        </div>
+    </form>
+
+    <form th:if="${mode == 'edit'}" th:action="@{/items/{id}/edit(id=${itemDetails.id})}" th:object="${item}" method="post">
+        <div>
+            <label for="editName">Name:</label>
+            <input type="text" id="editName" th:field="*{name}" />
+        </div>
+        <div>
+            <label for="editSku">SKU:</label>
+            <input type="text" id="editSku" th:field="*{sku}" readonly/>
+            <small class="muted-text">SKU cannot be changed.</small>
+        </div>
+        <div>
+            <label for="editReorderThreshold">Reorder Threshold:</label>
+            <input type="number" id="editReorderThreshold" th:field="*{reorderThreshold}" />
+        </div>
+        <div>
+            <label for="editUnit">Unit:</label>
+            <input type="text" id="editUnit" th:field="*{unit}" />
+        </div>
+        <div>
+            <button type="submit">Save Changes</button>
+            <a th:href="@{/items/{id}(id=${itemDetails.id})}">Cancel</a>
+        </div>
+        <br>
+    </form>
+    <div th:if="${mode == 'edit'}">
+        <p>Status:
+        <strong th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}"></strong>
+        </p>
+        <form th:if="${itemDetails.isActive}" th:action="@{/items/{id}/deactivate(id=${itemDetails.id})}" method="post">
+            <button type="submit">Deactivate</button>
+        </form>
+        <form th:if="${!itemDetails.isActive}" th:action="@{/items/{id}/activate(id=${itemDetails.id})}" method="post">
+            <button type="submit">Activate</button>
+        </form>
+    </div>
+</body>
+</html>

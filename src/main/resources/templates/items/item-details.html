@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Item Details</h1>
+    <p>name: <span th:text="${itemDetails.name}"></span></p>
+    <p>sku: <span th:text="${itemDetails.sku}"></span></p>
+    <p>current quantity: <span th:text="${itemDetails.currentQuantity}"></span></p>
+    <p>reorder threshold: <span th:text="${itemDetails.reorderThreshold}"></span></p>
+    <p>unit: <span th:text="${itemDetails.unit}"></span></p>
+    <p>status: <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}"></span></p>
+    <a th:if="${isAdmin}" th:href="@{/items/{id}/edit(id=${itemDetails.id})}">Edit Item</a>
+</body>
+</html>
