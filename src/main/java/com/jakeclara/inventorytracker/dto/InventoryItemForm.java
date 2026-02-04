@@ -2,10 +2,24 @@ package com.jakeclara.inventorytracker.dto;
 
 import com.jakeclara.inventorytracker.model.InventoryItem;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class InventoryItemForm {
+    @NotBlank(message = "Name is required")
+    @Size(min = 3, max = 150, message = "Name must be between 3 and 150 characters")
     private String name;
+
+    @NotBlank(message = "SKU is required")
+    @Size(min = 3, max = 50, message = "SKU must be between 3 and 50 characters")
     private String sku;
+
+    @NotBlank(message = "Reorder threshold is required")
+    @Min(value = 0, message = "Reorder threshold must be zero or greater")
     private int reorderThreshold;
+
+    @Size(max = 20, message = "Unit cannot exceed 20 characters")
     private String unit;
     
     public InventoryItemForm() {

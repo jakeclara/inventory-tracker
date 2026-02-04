@@ -5,7 +5,7 @@ import java.time.ZoneId;
 
 import com.jakeclara.inventorytracker.model.InventoryItem;
 
-public record InventoryItemDetails(
+public record InventoryItemDetailsView(
     Long id,
     String name,
     String sku,
@@ -15,8 +15,13 @@ public record InventoryItemDetails(
     boolean isActive,
     LocalDateTime createdAt
 ) {
-    public static InventoryItemDetails from(InventoryItem item, Long currentQuantity) {
-        return new InventoryItemDetails(
+
+    public boolean isLowStock() {
+    return currentQuantity < reorderThreshold;
+    }
+
+    public static InventoryItemDetailsView from(InventoryItem item, Long currentQuantity) {
+        return new InventoryItemDetailsView(
             item.getId(),
             item.getName(),
             item.getSku(),

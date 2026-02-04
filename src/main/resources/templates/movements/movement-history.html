@@ -1,0 +1,25 @@
+<div th:fragment="movement-history">
+    <h2>Movement History</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Date</th>
+                <th>Reference</th>
+                <th>Created By</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="movement : ${movementHistory}">
+                <td th:text="${movement.movementType}">Type</td>
+                <td th:text="${movement.quantity}">Quantity</td>
+                <td th:text="${movement.movementDate}">Date</td>
+                <td th:text="${movement.reference}">Reference</td>
+                <td th:text="${movement.createdBy}">Created By</td>
+            </tr>
+        </tbody>
+    </table>
+    
+</div>

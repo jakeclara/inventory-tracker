@@ -1,9 +1,11 @@
 package com.jakeclara.inventorytracker.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
-import com.jakeclara.inventorytracker.dto.InventoryItemDetails;
+import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 
@@ -60,12 +62,22 @@ public class InventoryItemService {
         return inventoryItemRepository.findCurrentQuantityByItemId(itemId);
     }
     
-    public InventoryItemDetails getItemDetails(Long itemId) {
+    public InventoryItemDetailsView getItemDetails(Long itemId) {
         InventoryItem item = getInventoryItemById(itemId);
-        return InventoryItemDetails.from(
+        return InventoryItemDetailsView.from(
             item, 
             getCurrentQuantity(itemId)
         );
+    }
+
+    public List<InventoryItemDetailsView> getInactiveItemDetails() {
+        return inventoryItemRepository.findByIsActiveFalseOrderByNameAsc()
+        .stream()
+        .map(item -> InventoryItemDetailsView.from(
+            item, 
+            getCurrentQuantity(item.getId())
+        ))
+        .toList();
     }
     
 }

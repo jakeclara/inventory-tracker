@@ -6,13 +6,29 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Item Details</h1>
-    <p>name: <span th:text="${itemDetails.name}"></span></p>
-    <p>sku: <span th:text="${itemDetails.sku}"></span></p>
-    <p>current quantity: <span th:text="${itemDetails.currentQuantity}"></span></p>
-    <p>reorder threshold: <span th:text="${itemDetails.reorderThreshold}"></span></p>
-    <p>unit: <span th:text="${itemDetails.unit}"></span></p>
-    <p>status: <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}"></span></p>
-    <a th:if="${isAdmin}" th:href="@{/items/{id}/edit(id=${itemDetails.id})}">Edit Item</a>
+    <section>
+        <h1>Item Details</h1>
+        <p>name: <span th:text="${itemDetails.name}"></span></p>
+        <p>sku: <span th:text="${itemDetails.sku}"></span></p>
+        <p>current quantity: 
+            <span th:text="${itemDetails.currentQuantity}"
+            th:classappend="${itemDetails.lowStock ? 'text-danger' : 'text-success'}">
+            </span>
+        </p>
+        <p>reorder threshold: <span th:text="${itemDetails.reorderThreshold}"></span></p>
+        <p>unit: <span th:text="${itemDetails.unit}"></span></p>
+        <p>status: <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}"></span></p>
+        <a th:if="${isAdmin}" th:href="@{/items/{id}/edit(id=${itemDetails.id})}">Edit Item</a>
+    </section>
+    
+    <p>DEBUG isActive: <span th:text="${itemDetails.isActive}"></span></p>
+
+    <section>
+        <div th:replace="~{movements/movement-history :: movement-history}"></div>
+    </section>
+    
+    <section th:if="${itemDetails.isActive}">
+        <div th:replace="~{movements/movement-form :: movement-form}"></div>
+    </section>
 </body>
 </html>

@@ -11,6 +11,8 @@ import com.jakeclara.inventorytracker.model.InventoryItem;
 
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, Long> {
 
+    List<InventoryItem> findByIsActiveFalseOrderByNameAsc();
+
     /**
      * Find all active inventory items with their total quantity.
      * 
@@ -60,4 +62,5 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, Lo
     Long findCurrentQuantityByItemId(@Param("itemId") Long itemId);
     
 }
+
 

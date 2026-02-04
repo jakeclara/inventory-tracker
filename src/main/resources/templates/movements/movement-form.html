@@ -1,0 +1,41 @@
+<div th:fragment="movement-form">
+    <h2>Add Movement</h2>
+
+    <form th:action="@{/items/{id}/movements(id=${itemDetails.id})}"
+          th:object="${movementForm}"
+          method="post">
+
+        <div>
+            <label for="movementType">Type</label>
+            <select id="movementType" th:field="*{movementType}">
+                <option value="" disabled selected>Select type</option>
+                <option th:each="type : ${movementTypes}"
+                        th:value="${type}"
+                        th:text="${type}">
+                </option>
+            </select>
+        </div>
+
+        <div>
+            <label for="quantity">Quantity</label>
+            <input id="quantity" type="number" th:field="*{quantity}" />
+        </div>
+
+        <div>
+            <label for="movementDate">Date</label>
+            <input id="movementDate" type="date" th:field="*{movementDate}" />
+        </div>
+
+        <div>
+            <label for="reference">Reference</label>
+            <input id="reference" type="text" th:field="*{reference}" />
+        </div>
+
+        <div>
+            <label for="note">Note</label>
+            <input id="note" type="text" th:field="*{note}" />
+        </div>
+
+        <button type="submit">Add Movement</button>
+    </form>
+</div>

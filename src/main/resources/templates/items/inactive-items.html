@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inactive Items</title>
+</head>
+<body>
+    <div>
+        <h2>Inactive Items</h2>
+    </div>
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Reorder Level</th>
+            <th>Status</th>
+            <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="item : ${inactiveItems}">
+
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.sku}"></td>
+            <td th:text="${item.currentQuantity}"></td>
+            <td th:text="${item.unit}"></td>
+            <td th:text="${item.reorderThreshold}"></td>
+            <td th:text="${item.isActive} ? 'Active' : 'Inactive'"
+                th:classappend="${item.isActive} ? 'text-success' : 'text-danger'">
+            </td>
+
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                th:href="@{/items/{id}(id=${item.id})}">
+                View
+                </a>
+            </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+</body>
+</html>

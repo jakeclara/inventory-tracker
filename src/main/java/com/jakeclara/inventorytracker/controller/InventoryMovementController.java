@@ -1,22 +1,19 @@
 package com.jakeclara.inventorytracker.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.jakeclara.inventorytracker.dto.CreateInventoryMovementRequest;
+import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
 import com.jakeclara.inventorytracker.service.InventoryMovementService;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
 
-@RestController
+@Controller
 @RequestMapping("/items/{itemId}/movements")
 public class InventoryMovementController {
     
@@ -27,12 +24,12 @@ public class InventoryMovementController {
     }
     
     @PostMapping
-    public ResponseEntity<Long> createInventoryMovement(
+    public String addInventoryMovement(
         @PathVariable Long itemId, 
-        @RequestBody CreateInventoryMovementRequest request
+        @ModelAttribute InventoryMovementForm form
     ) {
-        Long id = inventoryMovementService.createInventoryMovement(itemId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+        inventoryMovementService.addInventoryMovement(itemId, form);
+        return "redirect:/items/{itemId}";
     }
 
     @GetMapping("/{id}")

@@ -1,9 +1,13 @@
 package com.jakeclara.inventorytracker.service;
 
 import com.jakeclara.inventorytracker.model.User;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import com.jakeclara.inventorytracker.dto.CreateInventoryMovementRequest;
+import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
+import com.jakeclara.inventorytracker.dto.InventoryMovementView;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
 import com.jakeclara.inventorytracker.repository.InventoryMovementRepository;
@@ -28,32 +32,49 @@ public class InventoryMovementService {
     }
 
     @Transactional
-    public Long createInventoryMovement(Long itemId, CreateInventoryMovementRequest request) {
+    public void addInventoryMovement(Long itemId, InventoryMovementForm form) {
 
         InventoryItem inventoryItem = inventoryItemService.getInventoryItemById(itemId);
+        
+        if (!inventoryItem.isActive()) {
+            throw new IllegalStateException("Cannot add movement to inactive inventory item.");
+        }
+
+        Long currentQuantity = inventoryItemService.getCurrentQuantity(itemId);
+        int quantityDelta = form.movementType().apply(form.quantity());
+        
+        if (currentQuantity + quantityDelta < 0) {
+            throw new IllegalArgumentException("Insufficient inventory for this movement.");
+        }
 
         // TEMPORARY hardcoded user until auth is implemented
         User createdBy = userService.getUserById(1L);
 
         InventoryMovement newMovement = new InventoryMovement(
             inventoryItem,
-            request.quantity(),
-            request.movementType(),
-            request.movementDate(),
+            form.quantity(),
+            form.movementType(),
+            form.movementDate(),
             createdBy
         );
 
-        if (request.note() != null) {
-            newMovement.setNote(request.note());
+        if (form.note() != null) {
+            newMovement.setNote(form.note());
         }
 
-        if (request.reference() != null) {
-            newMovement.setReference(request.reference());
+        if (form.reference() != null) {
+            newMovement.setReference(form.reference());
         }
 
         inventoryMovementRepository.save(newMovement);
-        
-        return newMovement.getId();
+    }
+
+    public List<InventoryMovementView> getMovementsForItem(Long itemId) {
+        inventoryItemService.getInventoryItemById(itemId);
+        return inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(itemId)
+        .stream()
+        .map(InventoryMovementView::from)
+        .toList();
     }
 
     public InventoryMovement getInventoryMovementById(Long id) {

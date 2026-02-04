@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+</head>
+<body>
+    <div class="mb-3">
+        <h2>Inventory Dashboard</h2>
+        <p>
+            Low stock items:
+            <strong th:text="${lowStockCount}"></strong>
+        </p>
+    </div>
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Reorder Level</th>
+            <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="item : ${items}"
+                th:classappend="${item.lowStock()} ? 'table-warning' : ''">
+
+            <td th:text="${item.name}"></td>
+            <td th:text="${item.sku}"></td>
+
+            <td>
+                <span th:text="${item.currentQuantity}"></span>
+            </td>
+
+            <td th:text="${item.unit}"></td>
+            <td th:text="${item.reorderThreshold}"></td>
+
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                th:href="@{/items/{id}(id=${item.id})}">
+                View
+                </a>
+            </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+</body>
+</html>

@@ -2,7 +2,7 @@ package com.jakeclara.inventorytracker.dto;
 
 import java.util.List;
 
-public record InventoryDashboardResponse (
+public record InventoryDashboardView (
     List<InventoryDashboardItem> inventoryItems,
     long lowStockCount
 ){}
