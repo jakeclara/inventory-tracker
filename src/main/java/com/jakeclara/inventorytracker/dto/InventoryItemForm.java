@@ -4,6 +4,7 @@ import com.jakeclara.inventorytracker.model.InventoryItem;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class InventoryItemForm {
@@ -15,7 +16,7 @@ public class InventoryItemForm {
     @Size(min = 3, max = 50, message = "SKU must be between 3 and 50 characters")
     private String sku;
 
-    @NotBlank(message = "Reorder threshold is required")
+    @NotNull(message = "Reorder threshold is required")
     @Min(value = 0, message = "Reorder threshold must be zero or greater")
     private int reorderThreshold;
 

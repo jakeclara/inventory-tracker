@@ -11,43 +11,79 @@
     <form th:if="${mode == 'create'}" th:action="@{/items}" th:object="${item}" method="post">
         <div>
             <label for="name">Name:</label>
-            <input type="text" id="name" th:field="*{name}" />
+            <input type="text" 
+                    id="name" 
+                    th:field="*{name}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
         <div>
             <label for="sku">SKU:</label>
-            <input type="text" id="sku" th:field="*{sku}" />
+            <input type="text" 
+                    id="sku" 
+                    th:field="*{sku}" 
+                    class="form-control" 
+                    th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('sku')}" th:errors="*{sku}"></div>
         <div>
             <label for="reorderThreshold">Reorder Threshold:</label>
-            <input type="number" id="reorderThreshold" th:field="*{reorderThreshold}" />
+            <input type="number"
+                    id="reorderThreshold" 
+                    th:field="*{reorderThreshold}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('reorderThreshold')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('reorderThreshold')}" th:errors="*{reorderThreshold}"></div>
         <div>
             <label for="unit">Unit:</label>
-            <input type="text" id="unit" th:field="*{unit}" />
+            <input type="text" 
+                    id="unit" 
+                    th:field="*{unit}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('unit')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}"></div>
         <div>
             <button type="submit">Add Item</button>
+            <a th:href="@{/dashboard}">Cancel</a>
         </div>
     </form>
 
     <form th:if="${mode == 'edit'}" th:action="@{/items/{id}/edit(id=${itemDetails.id})}" th:object="${item}" method="post">
         <div>
             <label for="editName">Name:</label>
-            <input type="text" id="editName" th:field="*{name}" />
+            <input type="text" 
+                    id="editName" 
+                    th:field="*{name}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
         <div>
             <label for="editSku">SKU:</label>
-            <input type="text" id="editSku" th:field="*{sku}" readonly/>
-            <small class="muted-text">SKU cannot be changed.</small>
+            <span class="form-control-plaintext" id="editSku" th:text="*{sku}"></span>
+            <input type="hidden" th:field="*{sku}" />
         </div>
         <div>
             <label for="editReorderThreshold">Reorder Threshold:</label>
-            <input type="number" id="editReorderThreshold" th:field="*{reorderThreshold}" />
+            <input type="number" 
+                    id="editReorderThreshold" 
+                    th:field="*{reorderThreshold}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('reorderThreshold')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('reorderThreshold')}" th:errors="*{reorderThreshold}"></div>
         <div>
             <label for="editUnit">Unit:</label>
-            <input type="text" id="editUnit" th:field="*{unit}" />
+            <input type="text" 
+                    id="editUnit" 
+                    th:field="*{unit}"
+                    class="form-control"
+                    th:classappend="${#fields.hasErrors('unit')} ? 'is-invalid'" />
         </div>
+        <div class="invalid-feedback" th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}"></div>
         <div>
             <button type="submit">Save Changes</button>
             <a th:href="@{/items/{id}(id=${itemDetails.id})}">Cancel</a>

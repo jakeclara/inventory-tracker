@@ -12,12 +12,15 @@ import com.jakeclara.inventorytracker.model.InventoryMovementType;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
 import com.jakeclara.inventorytracker.service.InventoryMovementService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/items")
 public class InventoryItemController {
     private static final String REDIRECT_ITEM_DETAILS = "redirect:/items/{itemId}";
+    private static final String ITEM_FORM_VIEW = "items/item-form";
     
     private final InventoryItemService inventoryItemService;
     private final InventoryMovementService inventoryMovementService;
@@ -44,14 +48,21 @@ public class InventoryItemController {
     public String showCreateForm(Model model) {
         model.addAttribute("item", new InventoryItemForm());
         model.addAttribute("mode", "create");
-        return "items/item-form";
+        return ITEM_FORM_VIEW;
     }
 
     @PostMapping
     public String createInventoryItem(
-        @ModelAttribute("item") InventoryItemForm form,
+        @Valid @ModelAttribute("item") InventoryItemForm form,
+        BindingResult bindingResult,
+        Model model,
         RedirectAttributes redirectAttributes
     ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("mode", "create");
+            return ITEM_FORM_VIEW;
+        }
+
         Long itemId = inventoryItemService.createInventoryItem(form);
         redirectAttributes.addAttribute("itemId", itemId);
         return REDIRECT_ITEM_DETAILS;
@@ -89,17 +100,45 @@ public class InventoryItemController {
         model.addAttribute("itemDetails", details);
         model.addAttribute("item", editForm);
         model.addAttribute("mode", "edit");
-        return "items/item-form";
+        return ITEM_FORM_VIEW;
     }
 
     @PostMapping("/{itemId}/edit")
     public String editInventoryItem(
         @PathVariable Long itemId,
-        @ModelAttribute InventoryItemForm editForm
+        @Valid @ModelAttribute("item") InventoryItemForm editForm,
+        BindingResult bindingResult,
+        Model model
     ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
+            model.addAttribute("mode", "edit");
+            return ITEM_FORM_VIEW;
+        }
+
         inventoryItemService.updateInventoryItem(itemId, editForm);
         return REDIRECT_ITEM_DETAILS;
     }
+
+    @PostMapping("/{itemId}/movements")
+    public String addInventoryMovement(
+        @PathVariable Long itemId, 
+        @Valid @ModelAttribute("movementForm") InventoryMovementForm form,
+        BindingResult bindingResult,
+        Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
+            model.addAttribute("movementHistory", inventoryMovementService.getMovementsForItem(itemId));
+            model.addAttribute("movementTypes", InventoryMovementType.values());
+            model.addAttribute("isAdmin", true); // Placeholder for actual admin check
+            return "items/item-details";
+        }
+
+        inventoryMovementService.addInventoryMovement(itemId, form);
+        return REDIRECT_ITEM_DETAILS;
+    }
+
 
     @GetMapping("/inactive")
     public String getInactiveItems(Model model) {
