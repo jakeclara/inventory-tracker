@@ -3,13 +3,15 @@ package com.jakeclara.inventorytracker.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
+import com.jakeclara.inventorytracker.exception.DuplicateNameException;
+import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
+import com.jakeclara.inventorytracker.exception.ResourceNotFoundException;
+import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
 import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -23,6 +25,15 @@ public class InventoryItemService {
 
     @Transactional
     public Long createInventoryItem(InventoryItemForm form) {
+
+        if (inventoryItemRepository.existsByName(form.getName())) {
+            throw new DuplicateNameException("Item with that name already exists");
+        }
+
+        if (inventoryItemRepository.existsBySku(form.getSku())) {
+            throw new DuplicateSkuException("Item with that SKU already exists");
+        }
+
         InventoryItem newItem = new InventoryItem(
             form.getName(),
             form.getSku(),
@@ -48,6 +59,11 @@ public class InventoryItemService {
     @Transactional
     public void updateInventoryItem(Long itemID, InventoryItemForm editForm) {
         InventoryItem existingItem = getInventoryItemById(itemID);
+
+        if (inventoryItemRepository.existsByNameAndIdNot(editForm.getName(), itemID)) {
+            throw new DuplicateNameException("Item with that name already exists");
+        }
+
         existingItem.rename(editForm.getName());
         existingItem.updateReorderThreshold(editForm.getReorderThreshold());
         existingItem.setUnit(editForm.getUnit());
@@ -55,7 +71,7 @@ public class InventoryItemService {
 
     public InventoryItem getInventoryItemById(Long itemId) {
         return inventoryItemRepository.findById(itemId)
-        .orElseThrow(() -> new EntityNotFoundException("Inventory item not found " + itemId));
+        .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found " + itemId));
     }
 
     public Long getCurrentQuantity(Long itemId) {
@@ -70,14 +86,8 @@ public class InventoryItemService {
         );
     }
 
-    public List<InventoryItemDetailsView> getInactiveItemDetails() {
-        return inventoryItemRepository.findByIsActiveFalseOrderByNameAsc()
-        .stream()
-        .map(item -> InventoryItemDetailsView.from(
-            item, 
-            getCurrentQuantity(item.getId())
-        ))
-        .toList();
+    public List<InventoryDashboardItem> getInactiveItems() {
+        return inventoryItemRepository.findInactiveInventoryWithQuantity();
     }
     
 }

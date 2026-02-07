@@ -8,8 +8,8 @@ VALUES
 
 INSERT into app_user (username, password_hash, user_role, is_enabled)
 VALUES
-('admin', 'hashed_password_1', 'ADMIN', true),
-('regular', 'hashed_password_2', 'USER', true);
+('admin', '$2a$11$jTi3EMF6OQ5hj.V76LthJOqON96Wa6beRwp/Vpap169gENhFbqfsC', 'ADMIN', true),
+('regular', '$2a$11$bOFfWIol0NpD7Os8kei9lO7PvrKcwKU1n9L0rxSLBoLk7DsLEJJKO', 'USER', true);
 
 INSERT into inventory_movement (inventory_item_id, quantity, movement_type, movement_date, reference, note, created_by)
 VALUES

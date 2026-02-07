@@ -9,7 +9,10 @@
     <div>
         <h2>Inactive Items</h2>
     </div>
-    <table class="table table-striped align-middle">
+    <div th:if="${#lists.isEmpty(inactiveItems)}">
+        <p>No inactive items found</p>
+    </div>
+    <table th:if="${!#lists.isEmpty(inactiveItems)}" class="table table-striped align-middle">
         <thead>
             <tr>
             <th>Name</th>
@@ -17,22 +20,23 @@
             <th>Quantity</th>
             <th>Unit</th>
             <th>Reorder Level</th>
-            <th>Status</th>
             <th></th>
             </tr>
         </thead>
 
         <tbody>
-            <tr th:each="item : ${inactiveItems}">
+            <tr th:each="item : ${inactiveItems}"
+                th:classappend="${item.lowStock()} ? 'table-warning' : ''">
 
             <td th:text="${item.name}"></td>
             <td th:text="${item.sku}"></td>
-            <td th:text="${item.currentQuantity}"></td>
+
+            <td>
+                <span th:text="${item.currentQuantity}"></span>
+            </td>
+
             <td th:text="${item.unit}"></td>
             <td th:text="${item.reorderThreshold}"></td>
-            <td th:text="${item.isActive} ? 'Active' : 'Inactive'"
-                th:classappend="${item.isActive} ? 'text-success' : 'text-danger'">
-            </td>
 
             <td class="text-end">
                 <a class="btn btn-sm btn-outline-primary"

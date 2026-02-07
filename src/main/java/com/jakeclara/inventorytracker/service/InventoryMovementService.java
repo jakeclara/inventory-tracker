@@ -8,10 +8,13 @@ import org.springframework.stereotype.Service;
 
 import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
 import com.jakeclara.inventorytracker.dto.InventoryMovementView;
+import com.jakeclara.inventorytracker.exception.InactiveItemException;
+import com.jakeclara.inventorytracker.exception.InsufficientStockException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
 import com.jakeclara.inventorytracker.repository.InventoryMovementRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.jakeclara.inventorytracker.security.AuthenticatedUserProvider;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -19,16 +22,16 @@ public class InventoryMovementService {
     
     private final InventoryMovementRepository inventoryMovementRepository;
     private final InventoryItemService inventoryItemService;
-    private final UserService userService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     public InventoryMovementService(
         InventoryMovementRepository inventoryMovementRepository,
         InventoryItemService inventoryItemService,
-        UserService userService
+        AuthenticatedUserProvider authenticatedUserProvider
     ) {
         this.inventoryMovementRepository = inventoryMovementRepository;
         this.inventoryItemService = inventoryItemService;
-        this.userService = userService;
+        this.authenticatedUserProvider = authenticatedUserProvider;
     }
 
     @Transactional
@@ -37,18 +40,12 @@ public class InventoryMovementService {
         InventoryItem inventoryItem = inventoryItemService.getInventoryItemById(itemId);
         
         if (!inventoryItem.isActive()) {
-            throw new IllegalStateException("Cannot add movement to inactive inventory item.");
+            throw new InactiveItemException("Cannot add movement: Item " + inventoryItem.getName() + " is inactive.");
         }
 
-        Long currentQuantity = inventoryItemService.getCurrentQuantity(itemId);
-        int quantityDelta = form.movementType().apply(form.quantity());
-        
-        if (currentQuantity + quantityDelta < 0) {
-            throw new IllegalArgumentException("Insufficient inventory for this movement.");
-        }
+        ensureSufficientStock(itemId, form.movementType().apply(form.quantity()));
 
-        // TEMPORARY hardcoded user until auth is implemented
-        User createdBy = userService.getUserById(1L);
+        User createdBy = authenticatedUserProvider.getAuthenticatedUser();
 
         InventoryMovement newMovement = new InventoryMovement(
             inventoryItem,
@@ -77,10 +74,11 @@ public class InventoryMovementService {
         .toList();
     }
 
-    public InventoryMovement getInventoryMovementById(Long id) {
-        return inventoryMovementRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Inventory movement not found with id: " + id));
+    public void ensureSufficientStock(Long itemId, int quantityDelta) {
+        Long currentQuantity = inventoryItemService.getCurrentQuantity(itemId);
+        if (currentQuantity + quantityDelta < 0) {
+            throw new InsufficientStockException(currentQuantity, quantityDelta);
+        }
     }
-
 
 }

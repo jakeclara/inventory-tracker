@@ -5,8 +5,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
 import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
-import com.jakeclara.inventorytracker.dto.InventoryMovementView;
-import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
+import com.jakeclara.inventorytracker.exception.DuplicateNameException;
+import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
+import com.jakeclara.inventorytracker.exception.InsufficientStockException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovementType;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
@@ -15,8 +16,6 @@ import com.jakeclara.inventorytracker.service.InventoryMovementService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.List;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/items")
 public class InventoryItemController {
     private static final String REDIRECT_ITEM_DETAILS = "redirect:/items/{itemId}";
+    private static final String ITEM_DETAILS_VIEW = "items/item-details";
     private static final String ITEM_FORM_VIEW = "items/item-form";
     
     private final InventoryItemService inventoryItemService;
@@ -58,26 +58,30 @@ public class InventoryItemController {
         Model model,
         RedirectAttributes redirectAttributes
     ) {
+        model.addAttribute("mode", "create");
+
         if (bindingResult.hasErrors()) {
-            model.addAttribute("mode", "create");
             return ITEM_FORM_VIEW;
         }
 
-        Long itemId = inventoryItemService.createInventoryItem(form);
-        redirectAttributes.addAttribute("itemId", itemId);
-        return REDIRECT_ITEM_DETAILS;
+        try {
+            Long itemId = inventoryItemService.createInventoryItem(form);
+            redirectAttributes.addAttribute("itemId", itemId);
+            return REDIRECT_ITEM_DETAILS;
+        } catch (DuplicateNameException e) {
+            bindingResult.rejectValue("name", "duplicate", e.getMessage());
+        } catch (DuplicateSkuException e) {
+            bindingResult.rejectValue("sku", "duplicate", e.getMessage());
+        }
+        
+        return ITEM_FORM_VIEW;
     }
 
     @GetMapping("/{itemId}")
     public String getInventoryItemDetails(@PathVariable Long itemId, Model model) {
-        InventoryItemDetailsView details = inventoryItemService.getItemDetails(itemId);
-        List<InventoryMovementView> movements = inventoryMovementService.getMovementsForItem(itemId);
-        model.addAttribute("itemDetails", details);
-        model.addAttribute("movementHistory", movements);
         model.addAttribute("movementForm", InventoryMovementForm.empty());
-        model.addAttribute("movementTypes", InventoryMovementType.values());
-        model.addAttribute("isAdmin", true); // Placeholder for actual admin check
-        return "items/item-details";
+        prepareDetailsData(itemId, model);
+        return ITEM_DETAILS_VIEW;
     }
 
     @PostMapping("/{itemId}/deactivate")
@@ -95,10 +99,8 @@ public class InventoryItemController {
     @GetMapping("/{itemId}/edit")
     public String showEditForm(@PathVariable Long itemId, Model model) {
         InventoryItem item = inventoryItemService.getInventoryItemById(itemId);
-        InventoryItemDetailsView details = inventoryItemService.getItemDetails(itemId);
-        InventoryItemForm editForm = InventoryItemForm.from(item);
-        model.addAttribute("itemDetails", details);
-        model.addAttribute("item", editForm);
+        model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
+        model.addAttribute("item", InventoryItemForm.from(item));
         model.addAttribute("mode", "edit");
         return ITEM_FORM_VIEW;
     }
@@ -110,14 +112,22 @@ public class InventoryItemController {
         BindingResult bindingResult,
         Model model
     ) {
+        model.addAttribute("mode", "edit");
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
-            model.addAttribute("mode", "edit");
             return ITEM_FORM_VIEW;
         }
 
-        inventoryItemService.updateInventoryItem(itemId, editForm);
-        return REDIRECT_ITEM_DETAILS;
+        try {
+            inventoryItemService.updateInventoryItem(itemId, editForm);
+            return REDIRECT_ITEM_DETAILS;
+        } catch (DuplicateNameException e) {
+            bindingResult.rejectValue("name", "duplicate", e.getMessage());
+        }
+
+        model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
+        return ITEM_FORM_VIEW;
     }
 
     @PostMapping("/{itemId}/movements")
@@ -128,23 +138,30 @@ public class InventoryItemController {
         Model model
     ) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
-            model.addAttribute("movementHistory", inventoryMovementService.getMovementsForItem(itemId));
-            model.addAttribute("movementTypes", InventoryMovementType.values());
-            model.addAttribute("isAdmin", true); // Placeholder for actual admin check
-            return "items/item-details";
+            prepareDetailsData(itemId, model);
+            return ITEM_DETAILS_VIEW;
         }
-
-        inventoryMovementService.addInventoryMovement(itemId, form);
-        return REDIRECT_ITEM_DETAILS;
+        try {
+            inventoryMovementService.addInventoryMovement(itemId, form);
+            return REDIRECT_ITEM_DETAILS;
+        } catch (InsufficientStockException e) {
+            bindingResult.rejectValue("quantity", "insufficient", e.getMessage());
+            prepareDetailsData(itemId, model);
+            return ITEM_DETAILS_VIEW;
+        }
     }
-
 
     @GetMapping("/inactive")
     public String getInactiveItems(Model model) {
-        List<InventoryItemDetailsView> inactiveItems = inventoryItemService.getInactiveItemDetails();
-        model.addAttribute("inactiveItems", inactiveItems);
+        model.addAttribute("inactiveItems", inventoryItemService.getInactiveItems());
         return "items/inactive-items";
+    }
+
+    private void prepareDetailsData(Long itemId, Model model) {
+        model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
+        model.addAttribute("movementHistory", inventoryMovementService.getMovementsForItem(itemId));
+        model.addAttribute("movementTypes", InventoryMovementType.values());
+        model.addAttribute("isAdmin", true); // Placeholder for actual admin check
     }
     
 }
