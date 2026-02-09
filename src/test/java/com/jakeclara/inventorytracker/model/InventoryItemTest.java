@@ -1,6 +1,9 @@
 package com.jakeclara.inventorytracker.model;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.jakeclara.inventorytracker.util.TestInventoryItemFactory;
 
@@ -37,22 +40,13 @@ class InventoryItemTest {
 		assertThat(item.getSku()).isEqualTo("MB-AIR-002");
 	}
 
-	@Test
-	@DisplayName("Constructor with null name throws exception")
-	void constructor_WithNullName_ThrowsException() {
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"", "   "})
+	@DisplayName("Constructor should throw exception for null or blank names")
+	void constructor_WithInvalidName_ThrowsException(String invalidName) {
 		assertThatThrownBy(() -> new InventoryItem(
-			null,
-			TestInventoryItemFactory.VALID_SKU,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	@DisplayName("Constructor with blank name throws exception")
-	void constructor_WithBlankName_ThrowsException() {
-		String blankName = "   ";
-		assertThatThrownBy(() -> new InventoryItem(
-			blankName,
+			invalidName,
 			TestInventoryItemFactory.VALID_SKU,
 			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
 		.isInstanceOf(IllegalArgumentException.class)
@@ -71,23 +65,14 @@ class InventoryItemTest {
 		.hasMessage("Name cannot exceed 150 characters");
 	}
 
-	@Test
-	@DisplayName("Constructor with null SKU throws exception")
-	void constructor_WithNullSku_ThrowsException() {
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"", "   "})
+	@DisplayName("Constructor should throw exception for null or blank SKUs")
+	void constructor_WithInvalidSku_ThrowsException(String invalidSku) {
 		assertThatThrownBy(() -> new InventoryItem(
 			TestInventoryItemFactory.VALID_NAME,
-			null,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class);
-	}
-
-	@Test
-	@DisplayName("Constructor with blank SKU throws exception")
-	void constructor_WithBlankSku_ThrowsException() {
-		String blankSku = "   ";
-		assertThatThrownBy(() -> new InventoryItem(
-			TestInventoryItemFactory.VALID_NAME,
-			blankSku,
+			invalidSku,
 			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
 		.isInstanceOf(IllegalArgumentException.class)
 		.hasMessage("SKU cannot be blank");
@@ -126,12 +111,13 @@ class InventoryItemTest {
 		assertThat(item.getName()).isEqualTo(newName);
 	}
 
-	@Test
-	@DisplayName("Rename with blank name throws exception")
-	void rename_WithBlankName_ThrowsException() {
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"", "   "})
+	@DisplayName("Rename with null or blank name throws exception")
+	void rename_WithNullOrBlankName_ThrowsException(String invalidName) {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
-		String blankName = "   ";
-		assertThatThrownBy(() -> item.rename(blankName))
+		assertThatThrownBy(() -> item.rename(invalidName))
 		.isInstanceOf(IllegalArgumentException.class)
 		.hasMessage("Name cannot be blank");
 	}

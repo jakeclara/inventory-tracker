@@ -1,0 +1,79 @@
+package com.jakeclara.inventorytracker.repository;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+
+import com.jakeclara.inventorytracker.model.User;
+import com.jakeclara.inventorytracker.util.TestUserFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+
+@DataJpaTest
+class UserRepositoryTest {
+    
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
+
+    @Test
+    @DisplayName("findByUsername returns the correct User when found")
+    void findByUsername_ReturnsCorrectUser() {
+        User user = TestUserFactory.createDefaultUser();
+        entityManager.persist(user);
+        entityManager.flush();
+
+        Optional<User> foundUser = userRepository.findByUsername(user.getUsername());
+
+        assertThat(foundUser).isPresent();
+        assertThat(foundUser.get().getId()).isEqualTo(user.getId());
+        assertThat(foundUser.get().getUsername()).isEqualTo(user.getUsername());
+    }
+
+    @Test
+    @DisplayName("findByUsername returns empty when user not found")
+    void findByUsername_ReturnsEmptyWhenUserNotFound() {
+        Optional<User> foundUser = userRepository.findByUsername("nonexistentuser");
+
+        assertThat(foundUser).isNotPresent();
+    }
+
+    @Test
+    @DisplayName("findByUsername is case-insensitive because of entity logic")
+    void findByUsername_IsCaseInsensitive() {
+        User user = new User(
+            "AdminUser",
+            TestUserFactory.VALID_PASSWORD_HASH,
+            TestUserFactory.VALID_ROLE
+        );
+        entityManager.persist(user);
+        entityManager.flush();
+
+        Optional<User> foundUser = userRepository.findByUsername("adminuser");
+
+        assertThat(foundUser).isPresent();
+    }
+
+    @Test 
+    @DisplayName("Saving duplicate usernames throws exception")
+    void save_ThrowsExceptionWhenDuplicateUsernameExists() {
+        userRepository.saveAndFlush(TestUserFactory.createDefaultUser());
+
+        User duplicatUser = TestUserFactory.createDefaultUser();
+
+        assertThatThrownBy(() -> userRepository.saveAndFlush(duplicatUser))
+        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+    }
+
+
+
+
+}
