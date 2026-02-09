@@ -2,7 +2,7 @@ package com.jakeclara.inventorytracker.util;
 
 import com.jakeclara.inventorytracker.model.InventoryItem;
 
-public class TestItemFactory {
+public class TestInventoryItemFactory {
 
     public static final String VALID_NAME = "Gaming Laptop";
     public static final String VALID_SKU = "PC-LP-001";
