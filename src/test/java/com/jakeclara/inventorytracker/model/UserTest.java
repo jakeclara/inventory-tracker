@@ -16,16 +16,16 @@ class UserTest {
 		User user = TestUserFactory.createDefaultUser();
 		
 		assertThat(user.getId())
-		.as("New user should have null id before being saved to DB")
-		.isNull();
+			.as("New user should have null id before being saved to DB")
+			.isNull();
 
 		assertThat(user.getUsername()).isEqualTo(TestUserFactory.VALID_USERNAME);
 		assertThat(user.getPasswordHash()).isEqualTo(TestUserFactory.VALID_PASSWORD_HASH);
 		assertThat(user.getRole()).isEqualTo(TestUserFactory.VALID_ROLE);
 		
 		assertThat(user.isEnabled())
-		.as("New user should be active by default")
-		.isTrue();
+			.as("New user should be active by default")
+			.isTrue();
 	}
 
 	@Test
@@ -48,8 +48,9 @@ class UserTest {
 			invalidUsername,
 			TestUserFactory.VALID_PASSWORD_HASH,
 			TestUserFactory.VALID_ROLE
-		)).isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Username cannot be blank");
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Username cannot be blank");
 	}
 
 	@Test
@@ -60,8 +61,9 @@ class UserTest {
 			longUsername,
 			TestUserFactory.VALID_PASSWORD_HASH,
 			TestUserFactory.VALID_ROLE
-		)).isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Username cannot exceed 50 characters");
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Username cannot exceed 50 characters");
 	}
 
 	@ParameterizedTest
@@ -73,8 +75,9 @@ class UserTest {
 			TestUserFactory.VALID_USERNAME,
 			invalidPasswordHash,
 			TestUserFactory.VALID_ROLE
-		)).isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Password hash cannot be blank");
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Password hash cannot be blank");
 	}
 
 	@Test
@@ -84,8 +87,9 @@ class UserTest {
 			TestUserFactory.VALID_USERNAME,
 			TestUserFactory.VALID_PASSWORD_HASH,
 			null
-		)).isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Role cannot be null");
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Role cannot be null");
 	}
 
 }

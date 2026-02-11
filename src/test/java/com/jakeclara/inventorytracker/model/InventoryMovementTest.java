@@ -18,8 +18,8 @@ class InventoryMovementTest {
 		InventoryMovement movement = TestInventoryMovementFactory.createDefaultInventoryMovement();
 
 		assertThat(movement.getId())
-		.as("New movement should have null id before being saved to DB")
-		.isNull();
+			.as("New movement should have null id before being saved to DB")
+			.isNull();
 
 		assertThat(movement.getItem().getName()).isEqualTo(TestInventoryItemFactory.VALID_NAME);
 		assertThat(movement.getItem().getSku()).isEqualTo(TestInventoryItemFactory.VALID_SKU);
@@ -51,8 +51,8 @@ class InventoryMovementTest {
 			movementDate,
 			createdBy
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Item cannot be null");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Item cannot be null");
 	}
 
 	@Test
@@ -70,8 +70,8 @@ class InventoryMovementTest {
 			movementDate,
 			createdBy
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Quantity cannot be less than 1");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Quantity cannot be less than 1");
 	}
 
 	@Test 
@@ -88,8 +88,8 @@ class InventoryMovementTest {
 			movementDate,
 			createdBy
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Movement type cannot be null");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Movement type cannot be null");
 	}
 
 	@Test
@@ -105,8 +105,8 @@ class InventoryMovementTest {
 			null,
 			createdBy
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Movement date cannot be null");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Movement date cannot be null");
 	}
 
 	@Test
@@ -122,8 +122,8 @@ class InventoryMovementTest {
 			movementDate,
 			null
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Created by cannot be null");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Created by cannot be null");
 	}
 
 	@Test
@@ -140,8 +140,8 @@ class InventoryMovementTest {
 			futureMovementDate,
 			createdBy
 		))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Movement date cannot be in the future");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Movement date cannot be in the future");
 	}
 
 	@Test

@@ -19,10 +19,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class UserRepositoryTest {
     
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private TestEntityManager entityManager;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("findByUsername returns the correct User when found")
@@ -70,10 +70,7 @@ class UserRepositoryTest {
         User duplicatUser = TestUserFactory.createDefaultUser();
 
         assertThatThrownBy(() -> userRepository.saveAndFlush(duplicatUser))
-        .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+            .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
-
-
-
 
 }

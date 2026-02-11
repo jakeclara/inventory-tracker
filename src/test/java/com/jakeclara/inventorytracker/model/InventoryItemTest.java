@@ -16,16 +16,16 @@ class InventoryItemTest {
 	void constructor_WithValidData_SetsFields() {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		assertThat(item.getId())
-		.as("New item should have null id before being saved to DB")
-		.isNull();
+			.as("New item should have null id before being saved to DB")
+			.isNull();
 
 		assertThat(item.getName()).isEqualTo(TestInventoryItemFactory.VALID_NAME);
 		assertThat(item.getSku()).isEqualTo(TestInventoryItemFactory.VALID_SKU);
 		assertThat(item.getReorderThreshold()).isEqualTo(TestInventoryItemFactory.VALID_REORDER_THRESHOLD);
 
 		assertThat(item.isActive())
-		.as("New item should be active by default")
-		.isTrue();
+			.as("New item should be active by default")
+			.isTrue();
 	}
 
 	@Test
@@ -48,9 +48,10 @@ class InventoryItemTest {
 		assertThatThrownBy(() -> new InventoryItem(
 			invalidName,
 			TestInventoryItemFactory.VALID_SKU,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Name cannot be blank");
+			TestInventoryItemFactory.VALID_REORDER_THRESHOLD
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Name cannot be blank");
 	}
 
 	@Test
@@ -60,9 +61,10 @@ class InventoryItemTest {
 		assertThatThrownBy(() -> new InventoryItem(
 			longName,
 			TestInventoryItemFactory.VALID_SKU,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Name cannot exceed 150 characters");
+			TestInventoryItemFactory.VALID_REORDER_THRESHOLD
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Name cannot exceed 150 characters");
 	}
 
 	@ParameterizedTest
@@ -73,9 +75,10 @@ class InventoryItemTest {
 		assertThatThrownBy(() -> new InventoryItem(
 			TestInventoryItemFactory.VALID_NAME,
 			invalidSku,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("SKU cannot be blank");
+			TestInventoryItemFactory.VALID_REORDER_THRESHOLD
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("SKU cannot be blank");
 	}
 
 	@Test
@@ -85,9 +88,10 @@ class InventoryItemTest {
 		assertThatThrownBy(() -> new InventoryItem(
 			TestInventoryItemFactory.VALID_NAME,
 			longSku,
-			TestInventoryItemFactory.VALID_REORDER_THRESHOLD))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("SKU cannot exceed 50 characters");
+			TestInventoryItemFactory.VALID_REORDER_THRESHOLD
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("SKU cannot exceed 50 characters");
 	}
 
 	@Test
@@ -97,9 +101,10 @@ class InventoryItemTest {
 		assertThatThrownBy(() -> new InventoryItem(
 			TestInventoryItemFactory.VALID_NAME,
 			TestInventoryItemFactory.VALID_SKU,
-			negativeThreshold))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Reorder threshold cannot be negative");
+			negativeThreshold
+		))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Reorder threshold cannot be negative");
 	}
 
 	@Test
@@ -118,8 +123,8 @@ class InventoryItemTest {
 	void rename_WithNullOrBlankName_ThrowsException(String invalidName) {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		assertThatThrownBy(() -> item.rename(invalidName))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Name cannot be blank");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Name cannot be blank");
 	}
 
 	@Test
@@ -128,8 +133,8 @@ class InventoryItemTest {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		String longName = "A".repeat(151);
 		assertThatThrownBy(() -> item.rename(longName))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Name cannot exceed 150 characters");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Name cannot exceed 150 characters");
 	}
 
 	@Test
@@ -147,8 +152,8 @@ class InventoryItemTest {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		int negativeThreshold = -5;
 		assertThatThrownBy(() -> item.updateReorderThreshold(negativeThreshold))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Reorder threshold cannot be negative");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Reorder threshold cannot be negative");
 	}
 
 	@Test
@@ -172,8 +177,8 @@ class InventoryItemTest {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		String longUnit = "A".repeat(21);
 		assertThatThrownBy(() -> item.setUnit(longUnit))
-		.isInstanceOf(IllegalArgumentException.class)
-		.hasMessage("Unit cannot exceed 20 characters");
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Unit cannot exceed 20 characters");
 	}
 
 }

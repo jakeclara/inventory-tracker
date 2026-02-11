@@ -11,4 +11,12 @@ public class TestInventoryItemFactory {
     public static InventoryItem createDefaultItem() {
         return new InventoryItem(VALID_NAME, VALID_SKU, VALID_REORDER_THRESHOLD);
     }
+
+    public static InventoryItem createItem(
+        String name,
+        String sku,
+        int reorderThreshold
+    ) {
+        return new InventoryItem(name, sku, reorderThreshold);
+    }
 }
