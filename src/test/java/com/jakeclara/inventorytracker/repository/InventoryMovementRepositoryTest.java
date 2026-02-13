@@ -75,6 +75,7 @@ class InventoryMovementRepositoryTest {
         entityManager.persist(newerMovement);
         entityManager.persist(otherItemMovement);
         entityManager.flush();
+        entityManager.clear();
 
         // Act
         List<InventoryMovement> movements = 

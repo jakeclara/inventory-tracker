@@ -30,6 +30,7 @@ class UserRepositoryTest {
         User user = TestUserFactory.createDefaultUser();
         entityManager.persist(user);
         entityManager.flush();
+        entityManager.clear();
 
         Optional<User> foundUser = userRepository.findByUsername(user.getUsername());
 
@@ -56,6 +57,7 @@ class UserRepositoryTest {
         );
         entityManager.persist(user);
         entityManager.flush();
+        entityManager.clear();
 
         Optional<User> foundUser = userRepository.findByUsername("adminuser");
 
