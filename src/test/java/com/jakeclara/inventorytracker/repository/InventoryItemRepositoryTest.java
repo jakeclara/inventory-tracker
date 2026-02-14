@@ -379,9 +379,115 @@ class InventoryItemRepositoryTest {
 			.isZero();
 	}
 
+	@Test
+	@DisplayName("findCurrentQuantityByItemId returns 0 for non-existent item id")
+	void findCurrentQuantityByItemId_Returns0_ForNonExistentItemId() {
+		Long nonExistentItemId = 999L;
+		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(nonExistentItemId))
+			.isZero();
+	}
 
-	// TODO: Add tests for findCurrentQuantityByItemId returns correct quantity
+	@Test
+	@DisplayName("findCurrentQuantityByItemId returns correct quantity with mixed movements")
+	void findCurrentQuantityByItemId_ReturnsCorrectQuantity_WithMixedMovements() {
+		InventoryItem item = entityManager.persist(
+			TestInventoryItemFactory.createDefaultItem()
+		);
 
-	// TODO: Add test for findCurrentQuantityByItemId ignores other items movements
+		User user = entityManager.persist(
+			TestUserFactory.createDefaultUser()
+		);
 
+		InventoryMovement receiveMovement = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				item,
+				10,
+				InventoryMovementType.RECEIVE,
+				LocalDate.now(),
+				user
+			);
+
+		InventoryMovement saleMovement =
+			TestInventoryMovementFactory.createInventoryMovement(
+				item,
+				3,
+				InventoryMovementType.SALE,
+				LocalDate.now(),
+				user
+			);
+
+		InventoryMovement adjustInMovement = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				item,
+				5,
+				InventoryMovementType.ADJUST_IN,
+				LocalDate.now(),
+				user
+			);
+
+		InventoryMovement adjustOutMovement = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				item,
+				2,
+				InventoryMovementType.ADJUST_OUT,
+				LocalDate.now(),
+				user
+			);
+
+		entityManager.persist(receiveMovement);
+		entityManager.persist(saleMovement);
+		entityManager.persist(adjustInMovement);
+		entityManager.persist(adjustOutMovement);
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(item.getId()))
+			.isEqualTo(10);
+	}
+
+	@Test
+	@DisplayName("findCurrentQuantityByItemId ignores movements from other items")
+	void findCurrentQuantityByItemId_IgnoresMovementsFromOtherItems() {
+		InventoryItem itemA = entityManager.persist(
+			TestInventoryItemFactory.createDefaultItem()
+		);
+
+		InventoryItem itemB = entityManager.persist(
+			TestInventoryItemFactory.createItem(
+				"Other item",
+				"SKU-456",
+				10
+			)
+		);
+
+		User user = entityManager.persist(
+			TestUserFactory.createDefaultUser()
+		);
+
+		InventoryMovement receiveMovementA = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				itemA,
+				50,
+				InventoryMovementType.RECEIVE,
+				LocalDate.now(),
+				user
+			);
+
+		InventoryMovement receiveMovementB = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				itemB,
+				25,
+				InventoryMovementType.RECEIVE,
+				LocalDate.now(),
+				user
+			);
+
+		entityManager.persist(receiveMovementA);
+		entityManager.persist(receiveMovementB);
+		entityManager.flush();
+		entityManager.clear();
+
+		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(itemA.getId()))
+			.isEqualTo(50L);
+	}
 }
