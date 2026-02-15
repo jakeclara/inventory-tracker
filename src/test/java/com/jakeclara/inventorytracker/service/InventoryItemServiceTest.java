@@ -5,6 +5,7 @@ import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
 import com.jakeclara.inventorytracker.exception.DuplicateNameException;
 import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
+import com.jakeclara.inventorytracker.exception.ResourceNotFoundException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 import com.jakeclara.inventorytracker.util.TestInventoryItemFactory;
@@ -41,7 +42,7 @@ class InventoryItemServiceTest {
 	private InventoryItemService inventoryItemService;
 
 	// Helper method for creating a valid form
-	private InventoryItemForm validForm() {
+	private InventoryItemForm validItemForm() {
         return new InventoryItemForm(
             "Item A",
             "SKU-123",
@@ -52,9 +53,9 @@ class InventoryItemServiceTest {
 
 	@Test
 	@DisplayName("createInventoryItem should save and return id when form is valid")
-	void createInventoryItem_shouldSaveAndReturnId_whenFormIsValid() {
+	void createInventoryItem_ShouldSaveAndReturnId_WhenFormIsValid() {
 		// Arrange
-		InventoryItemForm form = validForm();
+		InventoryItemForm form = validItemForm();
 		
 		when(inventoryItemRepository.existsByName(form.getName()))
 			.thenReturn(false);
@@ -89,9 +90,9 @@ class InventoryItemServiceTest {
 
 	@Test
 	@DisplayName("createInventoryItem should throw DuplicateNameException when name already exists")
-	void createInventoryItem_shouldThrowDuplicateNameException_whenNameAlreadyExists() {
+	void createInventoryItem_ShouldThrowDuplicateNameException_WhenNameAlreadyExists() {
 		// Arrange
-		InventoryItemForm form = validForm();
+		InventoryItemForm form = validItemForm();
 		
 		when(inventoryItemRepository.existsByName(form.getName()))
 			.thenReturn(true);
@@ -108,9 +109,9 @@ class InventoryItemServiceTest {
 
 	@Test
 	@DisplayName("createInventoryItem should throw DuplicateSkuException when sku already exists")
-	void createInventoryItem_shouldThrowDuplicateSkuException_whenSkuAlreadyExists() {
+	void createInventoryItem_ShouldThrowDuplicateSkuException_WhenSkuAlreadyExists() {
 		// Arrange
-		InventoryItemForm form = validForm();
+		InventoryItemForm form = validItemForm();
 		
 		when(inventoryItemRepository.existsByName(form.getName()))
 			.thenReturn(false);
@@ -129,17 +130,216 @@ class InventoryItemServiceTest {
 	}
 
 	@Test
-	@DisplayName("getCurrentQuantity should return quantity from repository")
-	void getCurrentQuantity_ShouldReturnQuantityFromRepository() {
+	@DisplayName("activateInventoryItem should set item to active when item exists")
+	void activateInventoryItem_ShouldSetItemToActive_WhenItemExists() {
+		// Arrange
+		Long id = 1L;
+		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(item, "id", id);
 
+		// Ensure item is inactive
+		item.setIsActive(false);
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.of(item));
+		
+		// Act
+		inventoryItemService.activateInventoryItem(id);
+		
+		// Assert
+		assertThat(item.isActive()).isTrue();
+
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("activateInventoryItem should throw ResourceNotFoundException when item does not exist")
+	void activateInventoryItem_ShouldThrowResourceNotFoundException_WhenItemDoesNotExist() {
+		// Arrange
+		Long id = 999L;
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.empty());
+		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.activateInventoryItem(id))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("not found");
+		
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("deactivateInventoryItem should set item to inactive when item exists")
+	void deactivateInventoryItem_ShouldSetItemToInactive_WhenItemExists() {
+		// Arrange
+		Long id = 1L;
+		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(item, "id", id);
+
+		// Ensure item is active
+		item.setIsActive(true);
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.of(item));
+		
+		// Act
+		inventoryItemService.deactivateInventoryItem(id);
+		
+		// Assert
+		assertThat(item.isActive()).isFalse();
+
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("deactivateInventoryItem should throw ResourceNotFoundException when item does not exist")
+	void deactivateInventoryItem_ShouldThrowResourceNotFoundException_WhenItemDoesNotExist() {
+		// Arrange
+		Long id = 999L;
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.empty());
+		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.deactivateInventoryItem(id))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("not found");
+		
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("updateInventoryItem should update fields when input is valid")
+	void updateInventoryItem_ShouldUpdateFields_WhenInputIsValid() {
+		// Arrange
+		Long id = 1L;
+		InventoryItem existingItem = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(existingItem, "id", id);
+		// Sku should not change when updating
+		String originalSku = existingItem.getSku();
+		
+		InventoryItemForm form = new InventoryItemForm(
+			"Updated Name",
+			originalSku,
+			15,
+			"boxes"
+		);
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.of(existingItem));
+		
+		when(inventoryItemRepository.existsByNameAndIdNot(form.getName(), id))
+			.thenReturn(false);
+		
+		// Act
+		inventoryItemService.updateInventoryItem(id, form);
+		
+		// Assert
+		assertThat(existingItem.getName()).isEqualTo(form.getName());
+		assertThat(existingItem.getSku()).isEqualTo(originalSku);
+		assertThat(existingItem.getReorderThreshold()).isEqualTo(form.getReorderThreshold());
+		assertThat(existingItem.getUnit()).isEqualTo(form.getUnit());
+		
+		verify(inventoryItemRepository).findById(id);
+		verify(inventoryItemRepository).existsByNameAndIdNot(form.getName(), id);
+	}
+
+	@Test
+	@DisplayName("updateInventoryItem should throw DuplicateNameException when name already exists")
+	void updateInventoryItem_ShouldThrowDuplicateNameException_WhenNameAlreadyExists() {
+		// Arrange
+		Long id = 999L;
+		InventoryItem existingItem = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(existingItem, "id", id);
+		
+		InventoryItemForm form = validItemForm();
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.of(existingItem));
+		
+		when(inventoryItemRepository.existsByNameAndIdNot(form.getName(), id))
+			.thenReturn(true);
+		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(id, form))
+			.isInstanceOf(DuplicateNameException.class)
+			.hasMessageContaining("already exists");
+		
+		verify(inventoryItemRepository).findById(id);
+		verify(inventoryItemRepository).existsByNameAndIdNot(form.getName(), id);
+	}
+
+	@Test
+	@DisplayName("updateInventoryItem should throw ResourceNotFoundException when item does not exist")
+	void updateInventoryItem_ShouldThrowResourceNotFoundException_WhenItemDoesNotExist() {
+		// Arrange
+		Long id = 999L;
+		InventoryItemForm form = validItemForm();
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.empty());
+		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(id, form))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("not found");
+		
+		verify(inventoryItemRepository).findById(id);
+		verify(inventoryItemRepository, never()).existsByNameAndIdNot(any(), any());
+	}
+
+	@Test
+	@DisplayName("getInventoryItemById should return item when it exists")
+	void getInventoryItemById_ShouldReturnItem_WhenItemExists() {
+		// Arrange
+		Long id = 1L;
+		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(item, "id", id);
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.of(item));
+		
+		// Act
+		InventoryItem result = inventoryItemService.getInventoryItemById(id);
+		
+		// Assert
+		assertThat(result).isSameAs(item);
+		
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("getInventoryItemById should throw ResourceNotFoundException when item does not exist")
+	void getInventoryItemById_ShouldThrowResourceNotFoundException_WhenItemDoesNotExist() {
+		// Arrange
+		Long id = 999L;
+		
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.empty());
+		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.getInventoryItemById(id))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("not found");
+		
+		verify(inventoryItemRepository).findById(id);
+	}
+
+	@Test
+	@DisplayName("getCurrentQuantity should return correct quantity")
+	void getCurrentQuantity_ShouldReturnCorrectQuantity() {
+		// Arrange
 		Long itemId = 1L;
 		Long quantity = 25L;
 
 		when(inventoryItemRepository.findCurrentQuantityByItemId(itemId))
 			.thenReturn(quantity);
 
+		// Act
 		Long result = inventoryItemService.getCurrentQuantity(itemId);
 
+		// Assert
 		assertThat(result).isEqualTo(quantity);
 
 		verify(inventoryItemRepository)
@@ -149,7 +349,6 @@ class InventoryItemServiceTest {
 	@Test
 	@DisplayName("getItemDetails should return details view")
 	void getItemDetails_ShouldReturnDetailsView() {
-
 		// Arrange
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		
@@ -190,9 +389,27 @@ class InventoryItemServiceTest {
 	}
 
 	@Test
-	@DisplayName("getInactiveItems should return inactive items from repository")
-	void getInactiveItems_ShouldReturnInactiveItemsFromRepository() {
+	@DisplayName("getItemDetails should throw ResourceNotFoundException when item does not exist")
+	void getItemDetails_ShouldThrowResourceNotFoundException_WhenItemDoesNotExist() {
+		// Arrange
+		Long id = 999L;
+
+		when(inventoryItemRepository.findById(id))
+			.thenReturn(Optional.empty());
 		
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryItemService.getItemDetails(id))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessageContaining("not found");
+		
+		verify(inventoryItemRepository).findById(id);
+		verify(inventoryItemRepository, never()).findCurrentQuantityByItemId(any());
+	}
+
+	@Test
+	@DisplayName("getInactiveItems should return inactive items")
+	void getInactiveItems_ShouldReturnInactiveItems() {
+		// Arrange
 		InventoryDashboardItem itemA = new InventoryDashboardItem(
 			1L, 
 			"Item A", 
@@ -214,11 +431,12 @@ class InventoryItemServiceTest {
 		List<InventoryDashboardItem> items = List.of(itemA, itemB);
 		when(inventoryItemRepository.findInactiveInventoryWithQuantity()).thenReturn(items);
 
+		// Act
 		List<InventoryDashboardItem> results = inventoryItemService.getInactiveItems();
 
+		// Assert
 		assertThat(results).isSameAs(items);
 
 		verify(inventoryItemRepository).findInactiveInventoryWithQuantity();
 	}
-
 }
