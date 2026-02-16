@@ -16,6 +16,12 @@ public class AuthenticatedUserProvider {
     }
 
 
+    /**
+     * Retrieves the authenticated user from the security context.
+     *
+     * @return the authenticated user
+     * @throws IllegalStateException if no authenticated user is found
+     */
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         

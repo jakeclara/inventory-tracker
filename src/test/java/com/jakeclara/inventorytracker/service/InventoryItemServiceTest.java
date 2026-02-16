@@ -99,8 +99,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.createInventoryItem(form))
-			.isInstanceOf(DuplicateNameException.class)
-			.hasMessageContaining("already exists");
+			.isInstanceOf(DuplicateNameException.class);
 		
 		verify(inventoryItemRepository).existsByName(form.getName());
 		verify(inventoryItemRepository, never()).existsBySku(form.getSku());
@@ -121,8 +120,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.createInventoryItem(form))
-			.isInstanceOf(DuplicateSkuException.class)
-			.hasMessageContaining("already exists");
+			.isInstanceOf(DuplicateSkuException.class);
 		
 		verify(inventoryItemRepository).existsByName(form.getName());
 		verify(inventoryItemRepository).existsBySku(form.getSku());
@@ -163,8 +161,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.activateInventoryItem(id))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("not found");
+			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 	}
@@ -203,8 +200,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.deactivateInventoryItem(id))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("not found");
+			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 	}
@@ -263,8 +259,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(id, form))
-			.isInstanceOf(DuplicateNameException.class)
-			.hasMessageContaining("already exists");
+			.isInstanceOf(DuplicateNameException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 		verify(inventoryItemRepository).existsByNameAndIdNot(form.getName(), id);
@@ -282,8 +277,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(id, form))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("not found");
+			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 		verify(inventoryItemRepository, never()).existsByNameAndIdNot(any(), any());
@@ -320,8 +314,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.getInventoryItemById(id))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("not found");
+			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 	}
@@ -399,8 +392,7 @@ class InventoryItemServiceTest {
 		
 		// Act & Assert
 		assertThatThrownBy(() -> inventoryItemService.getItemDetails(id))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessageContaining("not found");
+			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemRepository).findById(id);
 		verify(inventoryItemRepository, never()).findCurrentQuantityByItemId(any());

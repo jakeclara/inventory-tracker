@@ -19,6 +19,13 @@ public class JpaUserDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Loads a user from the database by their username.
+     *
+     * @param username the username to search for
+     * @return a UserDetails object representing the user
+     * @throws UsernameNotFoundException if no user is found with the given username
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         
