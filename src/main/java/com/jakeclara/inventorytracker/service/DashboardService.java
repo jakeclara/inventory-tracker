@@ -2,14 +2,19 @@ package com.jakeclara.inventorytracker.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
 import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
+import com.jakeclara.inventorytracker.dto.common.Pagination;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
 
 @Service
 public class DashboardService {
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final InventoryItemRepository inventoryItemRepository;
 
@@ -17,22 +22,27 @@ public class DashboardService {
         this.inventoryItemRepository = inventoryItemRepository;
     }
 
-    /**
-     * Retrieves the inventory dashboard.
-     * 
-     * The inventory dashboard contains a list of all active inventory items with their total quantity.
-     * It also includes the count of inventory items that have a quantity below the reorder threshold.
-     * 
-     * @return an InventoryDashboardView containing the list of inventory items and the low stock count.
-     */
-    public InventoryDashboardView getInventoryDashboard() {
-        List<InventoryDashboardItem> inventoryItems = inventoryItemRepository.findActiveInventoryWithQuantity();
+    public InventoryDashboardView getInventoryDashboard(int page) {
 
-        long lowStockCount = inventoryItems.stream()
-            .filter(InventoryDashboardItem::lowStock)
-            .count();
+        int safePage = Math.max(page, 0);
+        
+        Page<InventoryDashboardItem> inventoryItemsPage = 
+            inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+                true,
+                PageRequest.of(safePage, DEFAULT_PAGE_SIZE)
+            );
+        
+        List<InventoryDashboardItem> inventoryItems = inventoryItemsPage.getContent();
 
-        return new InventoryDashboardView(inventoryItems, lowStockCount);
+        long lowStockCount = 
+            inventoryItemRepository.countLowStockByActiveStatus(true);
+
+        Pagination pagination = Pagination.from(inventoryItemsPage);
+
+        return new InventoryDashboardView(
+            inventoryItems, 
+            lowStockCount, 
+            pagination
+        );
     }
-    
 }

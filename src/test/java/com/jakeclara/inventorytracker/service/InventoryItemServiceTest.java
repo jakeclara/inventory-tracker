@@ -1,6 +1,7 @@
 package com.jakeclara.inventorytracker.service;
 
 import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
+import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
 import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
 import com.jakeclara.inventorytracker.exception.DuplicateNameException;
@@ -13,6 +14,7 @@ import com.jakeclara.inventorytracker.util.TestInventoryItemFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,9 +27,13 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 
@@ -399,36 +405,76 @@ class InventoryItemServiceTest {
 	}
 
 	@Test
-	@DisplayName("getInactiveItems should return inactive items")
-	void getInactiveItems_ShouldReturnInactiveItems() {
+	@DisplayName("getInactiveItems should return paginated inactive items with low stock count")
+	void getInactiveItems_ShouldReturnPaginatedInactiveItems() {
 		// Arrange
+		int page = 0;
+
 		InventoryDashboardItem itemA = new InventoryDashboardItem(
-			1L, 
-			"Item A", 
-			"SKU-123", 
-			10L, 
-			5, 
+			1L,
+			"Item A",
+			"SKU-123",
+			10L,
+			5,
 			"pcs"
 		);
 
 		InventoryDashboardItem itemB = new InventoryDashboardItem(
-			2L, 
-			"Item B", 
-			"SKU-456", 
-			4L, 
-			5, 
+			2L,
+			"Item B",
+			"SKU-456",
+			4L,
+			5,
 			"each"
 		);
 
-		List<InventoryDashboardItem> items = List.of(itemA, itemB);
-		when(inventoryItemRepository.findInactiveInventoryWithQuantity()).thenReturn(items);
+		List<InventoryDashboardItem> content = List.of(itemA, itemB);
+
+		Page<InventoryDashboardItem> itemPage =
+			new PageImpl<>(content, PageRequest.of(page, 10), content.size());
+
+		when(inventoryItemRepository
+			.findInventoryByActiveStatusWithQuantity(eq(false), any(PageRequest.class)))
+			.thenReturn(itemPage);
+
+		when(inventoryItemRepository.countLowStockByActiveStatus(false))
+			.thenReturn(1L);
 
 		// Act
-		List<InventoryDashboardItem> results = inventoryItemService.getInactiveItems();
+		InventoryDashboardView result =
+			inventoryItemService.getInactiveItems(page);
 
 		// Assert
-		assertThat(results).isSameAs(items);
+		assertThat(result).isNotNull();
+		assertThat(result.inventoryItems()).hasSize(2);
+		assertThat(result.lowStockCount()).isEqualTo(1L);
+		assertThat(result.pagination().currentPage()).isZero();
 
-		verify(inventoryItemRepository).findInactiveInventoryWithQuantity();
+		verify(inventoryItemRepository)
+			.findInventoryByActiveStatusWithQuantity(eq(false), any(PageRequest.class));
+
+		verify(inventoryItemRepository)
+			.countLowStockByActiveStatus(false);
+	}
+
+	@Test
+	@DisplayName("getInactiveItems should default to page 0 when negative page provided")
+	void getInactiveItems_ShouldDefaultToZero_WhenNegativePageProvided() {
+		when(inventoryItemRepository
+			.findInventoryByActiveStatusWithQuantity(eq(false), any(PageRequest.class)))
+			.thenReturn(Page.empty());
+
+		when(inventoryItemRepository.countLowStockByActiveStatus(false))
+			.thenReturn(0L);
+
+		inventoryItemService.getInactiveItems(-5);
+
+		ArgumentCaptor<PageRequest> pageCaptor =
+			ArgumentCaptor.forClass(PageRequest.class);
+
+		verify(inventoryItemRepository)
+			.findInventoryByActiveStatusWithQuantity(eq(false), pageCaptor.capture());
+
+		assertThat(pageCaptor.getValue().getPageNumber()).isZero();
 	}
 }

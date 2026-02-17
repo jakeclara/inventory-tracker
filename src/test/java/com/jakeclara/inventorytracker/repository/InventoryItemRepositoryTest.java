@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
@@ -24,6 +27,8 @@ import java.util.List;
 
 @DataJpaTest
 class InventoryItemRepositoryTest {
+
+	private static final int PAGE_SIZE = 10;
 
 	@Autowired
 	private TestEntityManager entityManager;
@@ -109,25 +114,35 @@ class InventoryItemRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("findActiveInventoryWithQuantity returns 0 when no movements exits")
-	void findActiveInventoryWithQuantity_Returns0_WhenNoMovementsExits() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns 0 when no movements exits")
+	void findInventoryByActiveStatusWithQuantity_Returns0_WhenNoMovementsExits() {
+		// Arrange
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		entityManager.persistAndFlush(item);
 		entityManager.clear();
 
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findActiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				true,
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		// Act
+		List<InventoryDashboardItem> results = page.getContent();
+		
+		// Assert
+		assertThat(page.getTotalElements()).isEqualTo(1);
 		
 		assertThat(results).hasSize(1);
+		
 		InventoryDashboardItem dto = results.get(0);
-
 		assertThat(dto.name()).isEqualTo(item.getName());
 		assertThat(dto.currentQuantity()).isZero();
 	}
 
 	@Test
-	@DisplayName("findActiveInventoryWithQuantity returns correct quantity with mixed movements")
-	void findActiveInventoryWithQuantity_ReturnsCorrectQuantity_WithMixedMovements() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns correct quantity with mixed movements")
+	void findInventoryByActiveStatusWithQuantity_ReturnsCorrectQuantity_WithMixedMovements() {
 		// Arrange
 		InventoryItem item = entityManager.persist(TestInventoryItemFactory.createDefaultItem());
 
@@ -157,20 +172,27 @@ class InventoryItemRepositoryTest {
 		entityManager.clear();
 
 		// Act
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findActiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				true,
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		List<InventoryDashboardItem> results = page.getContent();
 		
 		// Assert
-		assertThat(results).hasSize(1);
-		InventoryDashboardItem dto = results.get(0);
+		assertThat(page.getTotalElements()).isEqualTo(1);
 
+		assertThat(results).hasSize(1);
+
+		InventoryDashboardItem dto = results.get(0);
 		assertThat(dto.name()).isEqualTo(item.getName());
 		assertThat(dto.currentQuantity()).isEqualTo(5L);
 	}
 
 	@Test
-	@DisplayName("findActiveInventoryWithQuantity returns correct quantity with multiple items")
-	void findActiveInventoryWithQuantity_ReturnsCorrectQuantity_WithMultipleItems() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns correct quantity with multiple items")
+	void findInventoryByActiveStatusWithQuantity_ReturnsCorrectQuantity_WithMultipleItems() {
 		// Arrange
 		InventoryItem itemA = entityManager.persist(TestInventoryItemFactory.createDefaultItem());
 		InventoryItem itemB = entityManager.persist(TestInventoryItemFactory.createItem(
@@ -225,10 +247,17 @@ class InventoryItemRepositoryTest {
 		entityManager.clear();
 
 		// Act
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findActiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				true,
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		List<InventoryDashboardItem> results = page.getContent();
 		
 		// Assert
+		assertThat(page.getTotalElements()).isEqualTo(2);
+
 		assertThat(results)
 			.hasSize(2)
 			.extracting(InventoryDashboardItem::name, InventoryDashboardItem::currentQuantity)
@@ -239,8 +268,8 @@ class InventoryItemRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("findActiveInventoryWithQuantity returns ordered by name ascending")
-	void findActiveInventoryWithQuantity_ReturnsOrderedByNameAscending() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns ordered by name ascending")
+	void findInventoryByActiveStatusWithQuantity_ReturnsOrderedByNameAscending() {
 		// Arrange
 		InventoryItem itemA = TestInventoryItemFactory.createItem(
 			"A item",
@@ -267,10 +296,17 @@ class InventoryItemRepositoryTest {
 		entityManager.clear();
 
 		// Act
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findActiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				true,
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		List<InventoryDashboardItem> results = page.getContent();
 		
 		// Assert
+		assertThat(page.getTotalElements()).isEqualTo(3);
+
 		assertThat(results)
 			.hasSize(3)
 			.extracting(InventoryDashboardItem::name)
@@ -278,8 +314,8 @@ class InventoryItemRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("findByActiveWithQuantity excludes inactive items")
-	void findByActiveWithQuantity_ExcludesInactiveItems() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns only active items when isActive=true")
+	void findInventoryByActiveStatusWithQuantity_ReturnsOnlyActiveItems_WhenIsActiveTrue() {
 		// Arrange
 		InventoryItem itemA = TestInventoryItemFactory.createItem(
 			"Active item",
@@ -300,10 +336,17 @@ class InventoryItemRepositoryTest {
 		entityManager.clear();
 
 		// Act
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findActiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				true,
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		List<InventoryDashboardItem> results = page.getContent();
 		
 		// Assert
+		assertThat(page.getTotalElements()).isEqualTo(1);
+
 		assertThat(results)
 			.hasSize(1)
 			.extracting(InventoryDashboardItem::name)
@@ -311,8 +354,8 @@ class InventoryItemRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("findInactiveInventoryWithQuantity returns only inactive items with correct quantity")
-	void findInactiveInventoryWithQuantity_ReturnsOnlyInactiveItems_WithCorrectQuantity() {
+	@DisplayName("findInventoryByActiveStatusWithQuantity returns only inactive items with correct quantity when isActive=false")
+	void findInventoryByActiveStatusWithQuantity_ReturnsOnlyInactiveItems_WithCorrectQuantity() {
 		// Arrange
 		InventoryItem itemA = TestInventoryItemFactory.createItem(
 			"Active item",
@@ -356,16 +399,168 @@ class InventoryItemRepositoryTest {
 		entityManager.clear();
 
 		// Act
-		List<InventoryDashboardItem> results = 
-			inventoryItemRepository.findInactiveInventoryWithQuantity();
+		Page<InventoryDashboardItem> page = 
+			inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+				false, 
+				PageRequest.of(0, PAGE_SIZE)
+			);
+		
+		List<InventoryDashboardItem> results = page.getContent();
 		
 		// Assert
+		assertThat(page.getTotalElements()).isEqualTo(1);
+
 		assertThat(results)
 			.hasSize(1)
 			.extracting(InventoryDashboardItem::name, InventoryDashboardItem::currentQuantity)
 			.containsExactly(
 				tuple(itemB.getName(), 10L)
 		);
+	}
+
+	@Test
+	@DisplayName("countLowStockByActiveStatus returns 0 when no items are below threshold")
+	void countLowStockByActiveStatus_Returns0_WhenNoItemsAreBelowThreshold() {
+		// Arrange
+		InventoryItem item = TestInventoryItemFactory.createItem(
+			"Active item",
+			"SKU-123",
+			10
+		);
+
+		entityManager.persist(item);
+
+		User user = entityManager.persist(TestUserFactory.createDefaultUser());
+
+		InventoryMovement receiveMovement = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				item, 
+				11, 
+				InventoryMovementType.RECEIVE, 
+				LocalDate.now(), 
+				user
+		);
+
+		entityManager.persist(receiveMovement);
+		entityManager.flush();
+		entityManager.clear();
+
+		// Act
+		Long count = inventoryItemRepository.countLowStockByActiveStatus(true);
+
+		// Assert
+		assertThat(count).isZero();
+	}
+
+	@Test
+	@DisplayName("countLowStockByActiveStatus returns 1 when one item is below threshold")
+	void countLowStockByActiveStatus_Returns1_WhenOneItemIsBelowThreshold() {
+		// Arrange
+		InventoryItem item = TestInventoryItemFactory.createItem(
+			"Active item",
+			"SKU-123",
+			10
+		);
+
+		entityManager.persist(item);
+
+		User user = entityManager.persist(TestUserFactory.createDefaultUser());
+
+		InventoryMovement receiveMovement = 
+			TestInventoryMovementFactory.createInventoryMovement(
+				item, 
+				9, 
+				InventoryMovementType.RECEIVE, 
+				LocalDate.now(), 
+				user
+		);
+
+		entityManager.persist(receiveMovement);
+		entityManager.flush();
+		entityManager.clear();
+
+		// Act
+		Long count = inventoryItemRepository.countLowStockByActiveStatus(true);
+
+		// Assert
+		assertThat(count).isOne();
+	}
+
+	@Test
+	@DisplayName("countLowStockByActiveStatus respects active status filter")
+	void countLowStockByActiveStatus_RespectsActiveFilter() {
+		// Arrange
+		InventoryItem activeItem = TestInventoryItemFactory.createItem(
+			"Active Low Stock",
+			"SKU-123",
+			10
+		);
+
+		InventoryItem inactiveItem = TestInventoryItemFactory.createItem(
+			"Inactive Low Stock",
+			"SKU-456",
+			10
+		);
+		inactiveItem.setIsActive(false);
+
+		entityManager.persist(activeItem);
+		entityManager.persist(inactiveItem);
+
+		User user = entityManager.persist(TestUserFactory.createDefaultUser());
+
+		InventoryMovement movementA =
+			TestInventoryMovementFactory.createInventoryMovement(
+				activeItem,
+				5,
+				InventoryMovementType.RECEIVE,
+				LocalDate.now(),
+				user
+			);
+
+		InventoryMovement movementB =
+			TestInventoryMovementFactory.createInventoryMovement(
+				inactiveItem,
+				5,
+				InventoryMovementType.RECEIVE,
+				LocalDate.now(),
+				user
+			);
+
+		entityManager.persist(movementA);
+		entityManager.persist(movementB);
+		entityManager.flush();
+		entityManager.clear();
+
+		// Act
+		long activeCount = inventoryItemRepository.countLowStockByActiveStatus(true);
+		long inactiveCount = inventoryItemRepository.countLowStockByActiveStatus(false);
+
+		// Assert
+		assertThat(activeCount).isOne();
+		assertThat(inactiveCount).isOne();
+	}
+
+	@Test
+	@DisplayName("countLowStockByActiveStatus treats items with no movements as zero quantity")
+	void countLowStockByActiveStatus_ItemWithNoMovements_IsConsideredLowStock() {
+		// Arrange
+		InventoryItem item = TestInventoryItemFactory.createItem(
+			"No Movement Item",
+			"SKU-123",
+			10
+		);
+
+		entityManager.persist(item);
+		entityManager.flush();
+		entityManager.clear();
+
+		// No movements
+
+		// Act
+		long count = inventoryItemRepository.countLowStockByActiveStatus(true);
+
+		// Assert
+		assertThat(count).isOne();
 	}
 
 	@Test

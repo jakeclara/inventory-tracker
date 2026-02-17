@@ -8,6 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,131 +29,95 @@ class DashboardServiceTest {
 	private DashboardService dashboardService;
 
 	@Test
-	@DisplayName("getInventoryDashboard should calculate lowStock correctly")
-	void getInventoryDashboard_ShouldCalculateLowStockCorrectly() {
-		
+	@DisplayName("getInventoryDashboard returns dashboard view with repository data")
+	void getInventoryDashboard_ReturnsDashboardView() {
+
 		// Arrange
+		InventoryDashboardItem item =
+			new InventoryDashboardItem(
+				1L,
+				"Item A",
+				"SKU-123",
+				5L,
+				10,
+				"pcs"
+			);
 
-		// Not low stock
-		InventoryDashboardItem itemA = new InventoryDashboardItem(
-			1L, 
-			"Item A", 
-			"SKU-123", 
-			10L, 
-			5, 
-			"pcs"
-		);
+		Page<InventoryDashboardItem> page =
+			new PageImpl<>(List.of(item), PageRequest.of(0, 10), 1);
 
-		// Low stock
-		InventoryDashboardItem itemB = new InventoryDashboardItem(
-			2L, 
-			"Item B", 
-			"SKU-456", 
-			4L, 
-			5, 
-			"each"
-		);
+		when(inventoryItemRepository
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.thenReturn(page);
 
-		// Low stock
-		InventoryDashboardItem itemC = new InventoryDashboardItem(
-			3L, 
-			"Item C", 
-			"SKU-789", 
-			0L, 
-			5, 
-			"each"
-		);
-
-		List<InventoryDashboardItem> items = List.of(itemA, itemB, itemC);
-		when(inventoryItemRepository.findActiveInventoryWithQuantity()).thenReturn(items);
+		when(inventoryItemRepository.countLowStockByActiveStatus(true))
+			.thenReturn(1L);
 
 		// Act
-		InventoryDashboardView results = dashboardService.getInventoryDashboard();
+		InventoryDashboardView result =
+			dashboardService.getInventoryDashboard(0);
 
 		// Assert
-		assertThat(results.inventoryItems()).hasSize(3);
-		assertThat(results.lowStockCount()).isEqualTo(2);
+		assertThat(result.inventoryItems()).hasSize(1);
+		assertThat(result.lowStockCount()).isOne();
+		
+		assertThat(result.pagination().currentPage()).isZero();
+		assertThat(result.pagination().totalPages()).isOne();
+		assertThat(result.pagination().hasNext()).isFalse();
+		assertThat(result.pagination().hasPrevious()).isFalse();
 
-		verify(inventoryItemRepository).findActiveInventoryWithQuantity();
+
+		verify(inventoryItemRepository)
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10));
+
+		verify(inventoryItemRepository)
+			.countLowStockByActiveStatus(true);
 	}
 
 	@Test
-	@DisplayName("getInventoryDashboard should return empty list when no items found")
-	void getInventoryDashboard_ShouldReturnEmptyList_WhenNoItemsFound() {
-		
-		when(inventoryItemRepository.findActiveInventoryWithQuantity()).thenReturn(List.of());
+	@DisplayName("getInventoryDashboard clamps negative page number to zero")
+	void getInventoryDashboard_ClampsNegativePageToZero() {
 
-		InventoryDashboardView results = dashboardService.getInventoryDashboard();
+		// Arrange
+		Page<InventoryDashboardItem> page =
+			new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
 
-		assertThat(results.inventoryItems()).isEmpty();
-		assertThat(results.lowStockCount()).isZero();
+		when(inventoryItemRepository
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.thenReturn(page);
 
-		verify(inventoryItemRepository).findActiveInventoryWithQuantity();
+		when(inventoryItemRepository.countLowStockByActiveStatus(true))
+			.thenReturn(0L);
+
+		// Act
+		InventoryDashboardView result =
+			dashboardService.getInventoryDashboard(-5);
+
+		// Assert
+		assertThat(result.pagination().currentPage()).isZero();
+
+		verify(inventoryItemRepository)
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10));
 	}
 
 	@Test
-	@DisplayName("getInventoryDashboard should return 0 lowStockCount when no items are low stock")
-	void getInventoryDashboard_ShouldReturn0LowStockCount_WhenNoItemsAreLowStock() {
-		
-		InventoryDashboardItem itemA = new InventoryDashboardItem(
-			1L, 
-			"Item A", 
-			"SKU-123", 
-			15L, 
-			10, 
-			"pcs"
-		);
+	@DisplayName("getInventoryDashboard returns empty dashboard when no items found")
+	void getInventoryDashboard_ReturnsEmptyDashboard_WhenNoItemsFound() {
 
-		InventoryDashboardItem itemB = new InventoryDashboardItem(
-			2L, 
-			"Item B", 
-			"SKU-456", 
-			12L, 
-			10, 
-			"each"
-		);
+		Page<InventoryDashboardItem> page =
+			new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
 
-		List<InventoryDashboardItem> items = List.of(itemA, itemB);
-		when(inventoryItemRepository.findActiveInventoryWithQuantity()).thenReturn(items);
+		when(inventoryItemRepository
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.thenReturn(page);
 
-		InventoryDashboardView results = dashboardService.getInventoryDashboard();
+		when(inventoryItemRepository.countLowStockByActiveStatus(true))
+			.thenReturn(0L);
 
-		assertThat(results.inventoryItems()).hasSize(2);
-		assertThat(results.lowStockCount()).isZero();
+		InventoryDashboardView result =
+			dashboardService.getInventoryDashboard(0);
 
-		verify(inventoryItemRepository).findActiveInventoryWithQuantity();
-	}
-
-	@Test
-	@DisplayName("getInventoryDashboard should handle threshold boundary correctly")
-	void getInventoryDashboard_ShouldHandleThresholdBoundaryCorrectly() {
-		
-		InventoryDashboardItem itemA = new InventoryDashboardItem(
-			1L, 
-			"Item A", 
-			"SKU-123", 
-			5L, 
-			5, 
-			"pcs"
-		);
-
-		InventoryDashboardItem itemB = new InventoryDashboardItem(
-			2L, 
-			"Item B", 
-			"SKU-456", 
-			10L, 
-			10, 
-			"each"
-		);
-
-		List<InventoryDashboardItem> items = List.of(itemA, itemB);
-		when(inventoryItemRepository.findActiveInventoryWithQuantity()).thenReturn(items);
-
-		InventoryDashboardView results = dashboardService.getInventoryDashboard();
-
-		assertThat(results.inventoryItems()).hasSize(2);
-		assertThat(results.lowStockCount()).isZero();
-
-		verify(inventoryItemRepository).findActiveInventoryWithQuantity();
+		assertThat(result.inventoryItems()).isEmpty();
+		assertThat(result.lowStockCount()).isZero();
 	}
 }

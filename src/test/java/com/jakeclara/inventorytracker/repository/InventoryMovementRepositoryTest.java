@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
@@ -32,9 +34,13 @@ class InventoryMovementRepositoryTest {
     @DisplayName("findByItemIdOrderByMovementDateDesc returns empty list when no movements exist for given item ID")
     void findByItemIdOrderByMovementDateDesc_ReturnsEmptyList_WhenNoMovementsExist() {
         Long nonexistentItemId = 999L;
-        List<InventoryMovement> movements = 
-            inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(nonexistentItemId);
-        assertThat(movements).isEmpty();
+        Page<InventoryMovement> page = 
+            inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(
+                nonexistentItemId,
+                PageRequest.of(0, 10)
+            );
+        assertThat(page).isEmpty();
+        assertThat(page.getTotalElements()).isZero();
     }
 
     @Test
@@ -78,10 +84,17 @@ class InventoryMovementRepositoryTest {
         entityManager.clear();
 
         // Act
-        List<InventoryMovement> movements = 
-            inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(itemA.getId());
+        Page<InventoryMovement> page = 
+            inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(
+                itemA.getId(),
+                PageRequest.of(0, 10)
+            );
+        
+        List<InventoryMovement> movements = page.getContent();
 
         // Assert
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        
         assertThat(movements).hasSize(2);
         
         assertThat(movements.get(0).getMovementDate())

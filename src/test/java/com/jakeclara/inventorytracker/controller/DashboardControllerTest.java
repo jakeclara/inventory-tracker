@@ -19,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
+import com.jakeclara.inventorytracker.dto.common.Pagination;
 import com.jakeclara.inventorytracker.service.DashboardService;
 
 @WebMvcTest(DashboardController.class)
@@ -35,18 +36,26 @@ class DashboardControllerTest {
     @DisplayName("GET /dashboard should populate model and return dashboard view")
     void getInventoryDashboard_ShouldReturnDashboardView() throws Exception {
 
+        int page = 0;
+
+        Pagination pagination = new Pagination(
+            0,
+            1,  
+            false,
+            false
+        );
+
         InventoryDashboardView mockView = 
-            new InventoryDashboardView(List.of(), 2);
+            new InventoryDashboardView(List.of(), 2, pagination);
         
-        when(dashboardService.getInventoryDashboard())
+        when(dashboardService.getInventoryDashboard(page))
             .thenReturn(mockView);
 
-        mockMvc.perform(get("/dashboard"))
+        mockMvc.perform(get("/dashboard").param("page", String.valueOf(page)))
             .andExpect(status().isOk())
             .andExpect(view().name("dashboard/dashboard"))
-            .andExpect(model().attributeExists("items"))
-            .andExpect(model().attributeExists("lowStockCount"));
+            .andExpect(model().attribute("dashboard", mockView));
         
-        verify(dashboardService).getInventoryDashboard();
+        verify(dashboardService).getInventoryDashboard(page);
     }
 }

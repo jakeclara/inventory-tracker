@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -34,6 +35,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 
@@ -249,6 +253,8 @@ class InventoryMovementServiceTest {
 	void getMovementsForItem_ShouldReturnMappedMovementsForItem() {
 		// Arrange
 		Long id = 1L;
+		int page = 0;
+
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		ReflectionTestUtils.setField(item, "id", id);
 
@@ -266,17 +272,20 @@ class InventoryMovementServiceTest {
 		when(inventoryItemService.getInventoryItemById(id))
 			.thenReturn(item);
 		
-		when(inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(id))
-			.thenReturn(List.of(movement));
+		Page<InventoryMovement> movementPage = new PageImpl<>(List.of(movement));
+
+		when(inventoryMovementRepository
+			.findByItemIdOrderByMovementDateDesc(eq(id), any(PageRequest.class)))
+			.thenReturn(movementPage);
 		
 		// Act
-		List<InventoryMovementView> result = 
-			inventoryMovementService.getMovementsForItem(id);
+		Page<InventoryMovementView> result = 
+			inventoryMovementService.getMovementsForItem(id, page);
 		
 		// Assert
-		assertThat(result).hasSize(1);
+		assertThat(result.getContent()).hasSize(1);
 
-		InventoryMovementView view = result.get(0);
+		InventoryMovementView view = result.getContent().get(0);
 		assertThat(view.movementType()).isEqualTo(movement.getMovementType());
 		assertThat(view.quantity()).isEqualTo(movement.getQuantity());
 		assertThat(view.movementDate()).isEqualTo(movement.getMovementDate());
@@ -284,7 +293,8 @@ class InventoryMovementServiceTest {
 		assertThat(view.createdBy()).isEqualTo(createdBy.getUsername());
 
 		verify(inventoryItemService).getInventoryItemById(id);
-		verify(inventoryMovementRepository).findByItemIdOrderByMovementDateDesc(id);
+		verify(inventoryMovementRepository)
+			.findByItemIdOrderByMovementDateDesc(eq(id), any(PageRequest.class));
 	}
 
 	@Test
@@ -297,13 +307,40 @@ class InventoryMovementServiceTest {
 			.thenThrow(new ResourceNotFoundException("not found"));
 		
 		// Act & Assert
-		assertThatThrownBy(() -> inventoryMovementService.getMovementsForItem(id))
+		assertThatThrownBy(() -> inventoryMovementService.getMovementsForItem(id, 0))
 			.isInstanceOf(ResourceNotFoundException.class);
 		
 		verify(inventoryItemService).getInventoryItemById(id);
-		verify(inventoryMovementRepository, never()).findByItemIdOrderByMovementDateDesc(id);
+		
+		verify(inventoryMovementRepository, never())
+			.findByItemIdOrderByMovementDateDesc(any(), any());
 	}
 
+	@Test
+	@DisplayName("getMovementsForItem should use page 0 when negative page provided")
+	void getMovementsForItem_ShouldDefaultToZero_WhenNegativePageProvided() {
+		Long id = 1L;
+
+		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(item, "id", id);
+
+		when(inventoryItemService.getInventoryItemById(id))
+			.thenReturn(item);
+
+		when(inventoryMovementRepository
+			.findByItemIdOrderByMovementDateDesc(eq(id), any(PageRequest.class)))
+			.thenReturn(Page.empty());
+
+		inventoryMovementService.getMovementsForItem(id, -5);
+
+		ArgumentCaptor<PageRequest> pageCaptor =
+			ArgumentCaptor.forClass(PageRequest.class);
+
+		verify(inventoryMovementRepository)
+			.findByItemIdOrderByMovementDateDesc(eq(id), pageCaptor.capture());
+
+		assertThat(pageCaptor.getValue().getPageNumber()).isZero();
+	}
 
 	@Test
 	@DisplayName("ensureSufficientStock should not throw when stock is sufficient")

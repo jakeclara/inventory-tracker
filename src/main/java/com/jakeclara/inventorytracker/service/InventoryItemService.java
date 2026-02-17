@@ -2,12 +2,16 @@ package com.jakeclara.inventorytracker.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
+import com.jakeclara.inventorytracker.dto.common.Pagination;
 import com.jakeclara.inventorytracker.exception.DuplicateNameException;
 import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
 import com.jakeclara.inventorytracker.exception.ResourceNotFoundException;
 import com.jakeclara.inventorytracker.dto.InventoryDashboardItem;
+import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
 import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.repository.InventoryItemRepository;
@@ -16,6 +20,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class InventoryItemService {
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
     
     private final InventoryItemRepository inventoryItemRepository;
 
@@ -86,8 +92,27 @@ public class InventoryItemService {
         );
     }
 
-    public List<InventoryDashboardItem> getInactiveItems() {
-        return inventoryItemRepository.findInactiveInventoryWithQuantity();
+    public InventoryDashboardView getInactiveItems(int page) {
+
+        int safePage = Math.max(page, 0);
+        
+        Page<InventoryDashboardItem> inventoryItemsPage = 
+            inventoryItemRepository.findInventoryByActiveStatusWithQuantity(
+                false,
+                PageRequest.of(safePage, DEFAULT_PAGE_SIZE)
+            );
+        
+        List<InventoryDashboardItem> inventoryItems = inventoryItemsPage.getContent();
+
+        long lowStockCount = 
+            inventoryItemRepository.countLowStockByActiveStatus(false);
+
+        Pagination pagination = Pagination.from(inventoryItemsPage);
+        
+        return new InventoryDashboardView(
+            inventoryItems, 
+            lowStockCount, 
+            pagination
+        );
     }
-    
 }

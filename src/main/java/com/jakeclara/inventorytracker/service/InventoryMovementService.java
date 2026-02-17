@@ -2,8 +2,9 @@ package com.jakeclara.inventorytracker.service;
 
 import com.jakeclara.inventorytracker.model.User;
 
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
@@ -19,6 +20,8 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class InventoryMovementService {
+
+    private static final int DEFAULT_PAGE_SIZE = 10;
     
     private final InventoryMovementRepository inventoryMovementRepository;
     private final InventoryItemService inventoryItemService;
@@ -66,12 +69,18 @@ public class InventoryMovementService {
         inventoryMovementRepository.save(newMovement);
     }
 
-    public List<InventoryMovementView> getMovementsForItem(Long itemId) {
+    public Page<InventoryMovementView> getMovementsForItem(Long itemId, int page) {
         inventoryItemService.getInventoryItemById(itemId);
-        return inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(itemId)
-        .stream()
-        .map(InventoryMovementView::from)
-        .toList();
+        
+        int safePage = Math.max(page, 0);
+
+        Page<InventoryMovement> inventoryMovementsPage = 
+            inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(
+                itemId, 
+                PageRequest.of(safePage, DEFAULT_PAGE_SIZE)
+            );
+        
+        return inventoryMovementsPage.map(InventoryMovementView::from);
     }
 
     public void ensureSufficientStock(Long itemId, int quantityDelta) {

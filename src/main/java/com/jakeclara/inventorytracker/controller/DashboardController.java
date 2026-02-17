@@ -4,6 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
 import com.jakeclara.inventorytracker.service.DashboardService;
 
@@ -18,11 +20,14 @@ public class DashboardController {
     }
     
     @GetMapping
-    public String getInventoryDashboard(Model model) {
-        InventoryDashboardView dashboard = dashboardService.getInventoryDashboard();
+    public String getInventoryDashboard(
+        @RequestParam (defaultValue = "0") int page,
+        Model model
+    ) {
+        InventoryDashboardView dashboard = 
+            dashboardService.getInventoryDashboard(page);
         
-        model.addAttribute("items", dashboard.inventoryItems());
-        model.addAttribute("lowStockCount", dashboard.lowStockCount());
+        model.addAttribute("dashboard", dashboard);
         
         return "dashboard/dashboard";
     }

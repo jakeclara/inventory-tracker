@@ -1,10 +1,14 @@
 package com.jakeclara.inventorytracker.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
 import com.jakeclara.inventorytracker.dto.InventoryItemForm;
 import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
+import com.jakeclara.inventorytracker.dto.InventoryMovementView;
+import com.jakeclara.inventorytracker.dto.common.Pagination;
 import com.jakeclara.inventorytracker.exception.DuplicateNameException;
 import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
 import com.jakeclara.inventorytracker.exception.InsufficientStockException;
@@ -16,7 +20,7 @@ import com.jakeclara.inventorytracker.service.InventoryMovementService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
-
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,6 +36,7 @@ public class InventoryItemController {
     private static final String REDIRECT_ITEM_DETAILS = "redirect:/items/{itemId}";
     private static final String ITEM_DETAILS_VIEW = "items/item-details";
     private static final String ITEM_FORM_VIEW = "items/item-form";
+    private static final int INITIAL_PAGE = 0;
     
     private final InventoryItemService inventoryItemService;
     private final InventoryMovementService inventoryMovementService;
@@ -78,9 +83,13 @@ public class InventoryItemController {
     }
 
     @GetMapping("/{itemId}")
-    public String getInventoryItemDetails(@PathVariable Long itemId, Model model) {
+    public String getInventoryItemDetails(
+        @PathVariable Long itemId,
+        @RequestParam(defaultValue = "0") int page, 
+        Model model
+    ) {
         model.addAttribute("movementForm", InventoryMovementForm.empty());
-        prepareDetailsData(itemId, model);
+        prepareDetailsData(itemId, page, model);
         return ITEM_DETAILS_VIEW;
     }
 
@@ -138,7 +147,7 @@ public class InventoryItemController {
         Model model
     ) {
         if (bindingResult.hasErrors()) {
-            prepareDetailsData(itemId, model);
+            prepareDetailsData(itemId, INITIAL_PAGE,model);
             return ITEM_DETAILS_VIEW;
         }
         try {
@@ -146,20 +155,28 @@ public class InventoryItemController {
             return REDIRECT_ITEM_DETAILS;
         } catch (InsufficientStockException e) {
             bindingResult.rejectValue("quantity", "insufficient", e.getMessage());
-            prepareDetailsData(itemId, model);
+            prepareDetailsData(itemId, INITIAL_PAGE, model);
             return ITEM_DETAILS_VIEW;
         }
     }
 
     @GetMapping("/inactive")
-    public String getInactiveItems(Model model) {
-        model.addAttribute("inactiveItems", inventoryItemService.getInactiveItems());
+    public String getInactiveItems(
+        @RequestParam (defaultValue = "0") int page,
+        Model model
+    ) {
+        InventoryDashboardView inactiveItemsView = 
+            inventoryItemService.getInactiveItems(page);
+
+        model.addAttribute("inactiveItems", inactiveItemsView);
         return "items/inactive-items";
     }
 
-    private void prepareDetailsData(Long itemId, Model model) {
+    private void prepareDetailsData(Long itemId, int page, Model model) {
         model.addAttribute("itemDetails", inventoryItemService.getItemDetails(itemId));
-        model.addAttribute("movementHistory", inventoryMovementService.getMovementsForItem(itemId));
+        Page<InventoryMovementView> inventoryMovementsPage = inventoryMovementService.getMovementsForItem(itemId, page);
+        model.addAttribute("movementHistory", inventoryMovementsPage.getContent());
+        model.addAttribute("movementPagination", Pagination.from(inventoryMovementsPage));
         model.addAttribute("movementTypes", InventoryMovementType.values());
         model.addAttribute("isAdmin", true); // Placeholder for actual admin check
     }
