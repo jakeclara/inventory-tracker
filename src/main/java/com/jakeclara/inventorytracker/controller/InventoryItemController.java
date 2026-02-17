@@ -178,7 +178,6 @@ public class InventoryItemController {
         model.addAttribute("movementHistory", inventoryMovementsPage.getContent());
         model.addAttribute("movementPagination", Pagination.from(inventoryMovementsPage));
         model.addAttribute("movementTypes", InventoryMovementType.values());
-        model.addAttribute("isAdmin", true); // Placeholder for actual admin check
     }
     
 }

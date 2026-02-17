@@ -18,7 +18,7 @@ public class InventoryItemForm {
 
     @NotNull(message = "Reorder threshold is required")
     @Min(value = 0, message = "Reorder threshold must be zero or greater")
-    private int reorderThreshold;
+    private Integer reorderThreshold;
 
     @Size(max = 20, message = "Unit cannot exceed 20 characters")
     private String unit;
@@ -26,7 +26,7 @@ public class InventoryItemForm {
     public InventoryItemForm() {
     }
 
-    public InventoryItemForm(String name, String sku, int reorderThreshold, String unit) {
+    public InventoryItemForm(String name, String sku, Integer reorderThreshold, String unit) {
         this.name = name;
         this.sku = sku;
         this.reorderThreshold = reorderThreshold;
@@ -58,11 +58,11 @@ public class InventoryItemForm {
         this.sku = sku;
     }
 
-    public int getReorderThreshold() {
+    public Integer getReorderThreshold() {
         return reorderThreshold;
     }
 
-    public void setReorderThreshold(int reorderThreshold) {
+    public void setReorderThreshold(Integer reorderThreshold) {
         this.reorderThreshold = reorderThreshold;
     }
 

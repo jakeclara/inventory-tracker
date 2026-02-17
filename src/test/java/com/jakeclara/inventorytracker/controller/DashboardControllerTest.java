@@ -58,4 +58,13 @@ class DashboardControllerTest {
         
         verify(dashboardService).getInventoryDashboard(page);
     }
+
+    @Test
+    @DisplayName("GET /dashboard should return 401 for unauthenticated user")
+    void getInventoryDashboard_ShouldReturnUnauthorized_WhenNotAuthenticated() throws Exception {
+
+        mockMvc.perform(get("/dashboard"))
+            .andExpect(status().isUnauthorized());
+    }
+
 }
