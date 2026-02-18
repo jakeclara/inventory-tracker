@@ -66,5 +66,4 @@ class DashboardControllerTest {
         mockMvc.perform(get("/dashboard"))
             .andExpect(status().isUnauthorized());
     }
-
 }

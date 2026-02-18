@@ -180,5 +180,4 @@ class InventoryItemTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Unit cannot exceed 20 characters");
 	}
-
 }

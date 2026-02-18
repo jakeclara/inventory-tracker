@@ -33,14 +33,16 @@ class JpaUserDetailsServiceTest {
 	@Test
 	@DisplayName("loadUserByUsername should return UserDetails when user exists")
 	void loadUserByUsername_ShouldReturnUserDetails_WhenUserExists() {
-
+		// Arrange
 		User user = TestUserFactory.createDefaultUser();
 
 		when(userRepository.findByUsername(user.getUsername()))
 			.thenReturn(Optional.of(user));
-
+		
+		// Act
 		UserDetails userDetails = jpaUserDetailsService.loadUserByUsername(user.getUsername());
 
+		// Assert
 		assertThat(userDetails.getUsername()).isEqualTo(user.getUsername());
 		assertThat(userDetails.getPassword()).isEqualTo(user.getPasswordHash());
 		assertThat(userDetails.isEnabled()).isTrue();

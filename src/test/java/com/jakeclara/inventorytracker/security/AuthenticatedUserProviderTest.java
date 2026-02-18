@@ -43,6 +43,7 @@ class AuthenticatedUserProviderTest {
 	@Test
 	@DisplayName("getAuthenticatedUser should return user when authentication exists")
 	void getAuthenticatedUser_ShouldReturnUser_WhenAuthenticated() {
+		// Arrange
 		User user = TestUserFactory.createDefaultUser();
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -56,8 +57,10 @@ class AuthenticatedUserProviderTest {
 		when(userRepository.findByUsername(user.getUsername()))
 			.thenReturn(Optional.of(user));
 
+		// Act
 		User authenticatedUser = authenticatedUserProvider.getAuthenticatedUser();
 
+		// Assert
 		assertThat(authenticatedUser).isEqualTo(user);
 	}
 
@@ -75,7 +78,7 @@ class AuthenticatedUserProviderTest {
 	@Test
 	@DisplayName("getAuthenticatedUser should throw when user not found in database")
 	void getAuthenticatedUser_ShouldThrow_WhenUserNotFound() {
-
+		// Arrange
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
 			"nonexistentUser",
 			null,
@@ -87,6 +90,7 @@ class AuthenticatedUserProviderTest {
 		when(userRepository.findByUsername("nonexistentUser"))
 			.thenReturn(Optional.empty());
 
+		// Act & Assert
 		assertThatThrownBy(() -> authenticatedUserProvider.getAuthenticatedUser())
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessage("Authenticated user not found");

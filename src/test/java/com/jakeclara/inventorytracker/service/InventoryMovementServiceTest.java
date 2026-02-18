@@ -319,6 +319,7 @@ class InventoryMovementServiceTest {
 	@Test
 	@DisplayName("getMovementsForItem should use page 0 when negative page provided")
 	void getMovementsForItem_ShouldDefaultToZero_WhenNegativePageProvided() {
+		// Arrange
 		Long id = 1L;
 
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
@@ -331,6 +332,7 @@ class InventoryMovementServiceTest {
 			.findByItemIdOrderByMovementDateDesc(eq(id), any(PageRequest.class)))
 			.thenReturn(Page.empty());
 
+		// Act
 		inventoryMovementService.getMovementsForItem(id, -5);
 
 		ArgumentCaptor<PageRequest> pageCaptor =
@@ -339,6 +341,7 @@ class InventoryMovementServiceTest {
 		verify(inventoryMovementRepository)
 			.findByItemIdOrderByMovementDateDesc(eq(id), pageCaptor.capture());
 
+		// Assert
 		assertThat(pageCaptor.getValue().getPageNumber()).isZero();
 	}
 
@@ -381,8 +384,4 @@ class InventoryMovementServiceTest {
 
 		verify(inventoryItemService).getCurrentQuantity(itemId);
 	}
-
-
-
-	
 }

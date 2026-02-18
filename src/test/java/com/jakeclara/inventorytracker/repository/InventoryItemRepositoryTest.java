@@ -566,10 +566,12 @@ class InventoryItemRepositoryTest {
 	@Test
 	@DisplayName("findCurrentQuantityByItemId returns 0 when no movements")
 	void findCurrentQuantityByItemId_Returns0_WhenNoMovements() {
+		// Arrange
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		entityManager.persistAndFlush(item);
 		entityManager.clear();
 
+		// Act & Assert
 		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(item.getId()))
 			.isZero();
 	}
@@ -577,7 +579,10 @@ class InventoryItemRepositoryTest {
 	@Test
 	@DisplayName("findCurrentQuantityByItemId returns 0 for non-existent item id")
 	void findCurrentQuantityByItemId_Returns0_ForNonExistentItemId() {
+		// Arrange
 		Long nonExistentItemId = 999L;
+
+		// Act & Assert
 		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(nonExistentItemId))
 			.isZero();
 	}
@@ -585,6 +590,7 @@ class InventoryItemRepositoryTest {
 	@Test
 	@DisplayName("findCurrentQuantityByItemId returns correct quantity with mixed movements")
 	void findCurrentQuantityByItemId_ReturnsCorrectQuantity_WithMixedMovements() {
+		// Arrange
 		InventoryItem item = entityManager.persist(
 			TestInventoryItemFactory.createDefaultItem()
 		);
@@ -636,6 +642,7 @@ class InventoryItemRepositoryTest {
 		entityManager.flush();
 		entityManager.clear();
 
+		// Act & Assert
 		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(item.getId()))
 			.isEqualTo(10);
 	}
@@ -643,6 +650,7 @@ class InventoryItemRepositoryTest {
 	@Test
 	@DisplayName("findCurrentQuantityByItemId ignores movements from other items")
 	void findCurrentQuantityByItemId_IgnoresMovementsFromOtherItems() {
+		// Arrange
 		InventoryItem itemA = entityManager.persist(
 			TestInventoryItemFactory.createDefaultItem()
 		);
@@ -682,6 +690,7 @@ class InventoryItemRepositoryTest {
 		entityManager.flush();
 		entityManager.clear();
 
+		// Act & Assert
 		assertThat(inventoryItemRepository.findCurrentQuantityByItemId(itemA.getId()))
 			.isEqualTo(50L);
 	}

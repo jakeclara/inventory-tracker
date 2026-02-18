@@ -2,7 +2,11 @@ package com.jakeclara.inventorytracker.controller;
 
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -33,11 +37,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.jakeclara.inventorytracker.config.SecurityConfig;
 import com.jakeclara.inventorytracker.dto.InventoryDashboardView;
 import com.jakeclara.inventorytracker.dto.InventoryItemDetailsView;
+import com.jakeclara.inventorytracker.dto.InventoryItemForm;
+import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
 import com.jakeclara.inventorytracker.dto.InventoryMovementView;
 import com.jakeclara.inventorytracker.dto.common.Pagination;
+import com.jakeclara.inventorytracker.exception.DuplicateNameException;
+import com.jakeclara.inventorytracker.exception.InactiveItemException;
+import com.jakeclara.inventorytracker.exception.InsufficientStockException;
 import com.jakeclara.inventorytracker.exception.ResourceNotFoundException;
+import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
 import com.jakeclara.inventorytracker.service.InventoryMovementService;
+import com.jakeclara.inventorytracker.util.TestInventoryItemFactory;
 
 @WebMvcTest(InventoryItemController.class)
 @Import(SecurityConfig.class)
@@ -61,6 +72,7 @@ class InventoryItemControllerTest {
         @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(get("/items/new"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
@@ -72,6 +84,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should return 403 for non-admin user")
         void shouldReturn403_WhenUserRole() throws Exception {
+            
             mockMvc.perform(get("/items/new"))
                 .andExpect(status().isForbidden());
 
@@ -82,6 +95,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should return item form view with create mode for ADMIN")
         void shouldReturnItemFormView_WhenAdmin() throws Exception {
+            
             mockMvc.perform(get("/items/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("items/item-form"))
@@ -97,6 +111,7 @@ class InventoryItemControllerTest {
         @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(post("/items")
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -109,6 +124,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should return 403 for non-admin user")
         void shouldReturn403_WhenUserRole() throws Exception {
+            
             mockMvc.perform(post("/items")
                     .with(csrf()))
                 .andExpect(status().isForbidden());
@@ -120,6 +136,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should return form view when validation fails")
         void shouldReturnFormView_WhenValidationFails() throws Exception {
+            
             mockMvc.perform(post("/items")
                     .with(csrf())
                     .param("name", "")
@@ -143,6 +160,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should return form view when reorderThreshold is negative")
         void shouldReturnFormView_WhenReorderThresholdIsNegative() throws Exception {
+            
             mockMvc.perform(post("/items")
                     .with(csrf())
                     .param("name", "Item A")
@@ -165,6 +183,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should return form view when unit is invalid")
         void shouldReturnFormView_WhenUnitIsInvalid() throws Exception {
+            
             mockMvc.perform(post("/items")
                     .with(csrf())
                     .param("name", "Item A")
@@ -187,7 +206,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should create item and redirect when input is valid")
         void shouldRedirect_WhenValid() throws Exception {
-
+            
             when(inventoryItemService.createInventoryItem(any()))
                 .thenReturn(ITEM_ID);
 
@@ -212,6 +231,7 @@ class InventoryItemControllerTest {
        @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(post("/items/{id}/deactivate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -224,6 +244,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should return 403 for non-admin user")
         void deactivateInventoryItem_ShouldReturn403_WhenUserRole() throws Exception {
+            
             mockMvc.perform(post("/items/{id}/deactivate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().isForbidden());
@@ -235,7 +256,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("should deactivate and redirect to item details view for ADMIN")
         void deactivateInventoryItem_ShouldDeactivateAndRedirect_WhenAdmin() throws Exception {
-
+            
             mockMvc.perform(post("/items/{id}/deactivate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -253,6 +274,7 @@ class InventoryItemControllerTest {
         @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(post("/items/{id}/activate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -265,6 +287,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("activateInventoryItem should return 403 for non-admin user")
         void activateInventoryItem_ShouldReturn403_WhenUserRole() throws Exception {
+            
             mockMvc.perform(post("/items/{id}/activate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().isForbidden());
@@ -276,7 +299,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("activateInventoryItem should activate and redirect to item details view")
         void activateInventoryItem_ShouldActivateAndRedirect() throws Exception {
-
+            
             mockMvc.perform(post("/items/{id}/activate", ITEM_ID)
                     .with(csrf()))
                 .andExpect(status().is3xxRedirection())
@@ -294,6 +317,7 @@ class InventoryItemControllerTest {
         @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(get("/items/{id}", ITEM_ID))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
@@ -305,12 +329,10 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should return item details view with populated model")
         void shouldReturnDetailsView_WithPopulatedModel() throws Exception {
-
-            // Mock item details
+            
             when(inventoryItemService.getItemDetails(ITEM_ID))
                     .thenReturn(mock(InventoryItemDetailsView.class));
 
-            // Mock empty movement page
             Page<InventoryMovementView> movementPage =
                     new PageImpl<>(List.of());
 
@@ -334,7 +356,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should redirect to dashboard when item not found")
         void shouldRedirectToDashboard_WhenItemNotFound() throws Exception {
-
+            
             when(inventoryItemService.getItemDetails(ITEM_ID))
                 .thenThrow(new ResourceNotFoundException("Not found"));
 
@@ -348,7 +370,7 @@ class InventoryItemControllerTest {
         }
     }
 
-    // GET /items/inactive 
+    // GET /items/inactive (ADMIN only)
     @Nested
     @DisplayName("GET /items/inactive - Inactive items")
     class GetInactiveItems {
@@ -356,6 +378,7 @@ class InventoryItemControllerTest {
         @Test
         @DisplayName("should redirect to login when unauthenticated")
         void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
             mockMvc.perform(get("/items/inactive"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
@@ -367,6 +390,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "USER")
         @DisplayName("should return 403 for non-admin user")
         void shouldReturn403_WhenUserRole() throws Exception {
+            
             mockMvc.perform(get("/items/inactive"))
                 .andExpect(status().isForbidden());
 
@@ -377,6 +401,7 @@ class InventoryItemControllerTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("getInactiveItems should return inactive items view for ADMIN")
         void shouldReturnInactiveItemsView_WhenAdmin() throws Exception {
+            
             int page = 0;
 
             Pagination pagination = new Pagination(
@@ -401,4 +426,274 @@ class InventoryItemControllerTest {
         }
     }
 
+    // GET /items/{id}/edit  (ADMIN only)
+    @Nested
+    @DisplayName("GET /items/{id}/edit - View edit item form")
+    class GetEditItemForm {
+        @Test
+        @DisplayName("should redirect to login when unauthenticated")
+        void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+            
+            mockMvc.perform(get("/items/{id}/edit", ITEM_ID))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+            verifyNoInteractions(inventoryItemService);
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should return 403 for non-admin user")
+        void shouldReturn403_WhenUserRole() throws Exception {
+            
+            mockMvc.perform(get("/items/{id}/edit", ITEM_ID))
+                .andExpect(status().isForbidden());
+
+            verifyNoInteractions(inventoryItemService);
+        }
+        
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        @DisplayName("should return item form view with edit mode for ADMIN")
+        void shouldReturnItemFormView_WhenAdmin() throws Exception {
+            
+            InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+            
+            when(inventoryItemService.getInventoryItemById(ITEM_ID))
+                .thenReturn(item);
+                
+            when(inventoryItemService.getItemDetails(ITEM_ID))
+                .thenReturn(mock(InventoryItemDetailsView.class));
+
+            mockMvc.perform(get("/items/{id}/edit", ITEM_ID))
+                .andExpect(status().isOk())
+                .andExpect(view().name("items/item-form"))
+                .andExpect(model().attributeExists("item"))
+                .andExpect(model().attributeExists("itemDetails"))
+                .andExpect(model().attribute("mode", "edit"));
+            
+            verify(inventoryItemService).getItemDetails(ITEM_ID);
+        }
+    }
+
+    // POST items/edit/{id} (ADMIN only)
+    @Nested
+    @DisplayName("POST /items/edit/{id} - Edit item")
+    class EditInventoryItem {
+
+        @Test
+        @DisplayName("should redirect to login when unauthenticated")
+        void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+           
+            mockMvc.perform(post("/items/{id}/edit", ITEM_ID)
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+            
+            verifyNoInteractions(inventoryItemService);
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should return 403 for non-admin user")
+        void shouldReturn403_WhenUserRole() throws Exception {
+            
+            mockMvc.perform(post("/items/{id}/edit", ITEM_ID)
+                    .with(csrf()))
+                .andExpect(status().isForbidden());
+            
+            verifyNoInteractions(inventoryItemService);
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        @DisplayName("should update item and redirect when form is valid")
+        void shouldUpdateItemAndRedirect_WhenFormIsValid() throws Exception {
+            
+            mockMvc.perform(post("/items/{id}/edit", ITEM_ID)
+                    .with(csrf())
+                    .param("name", "Updated Name")
+                    .param("sku", "SKU-123") // sku not updated through edit form
+                    .param("reorderThreshold", "10")
+                    .param("unit", "boxes"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/items/" + ITEM_ID));
+
+            verify(inventoryItemService)
+                .updateInventoryItem(eq(ITEM_ID), any(InventoryItemForm.class)); 
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        @DisplayName("should return item form view when validation fails")
+        void shouldReturnForm_WhenValidationFails() throws Exception {
+            
+            when(inventoryItemService.getItemDetails(ITEM_ID))
+                .thenReturn(mock(InventoryItemDetailsView.class));
+            
+            mockMvc.perform(post("/items/{id}/edit", ITEM_ID)
+                    .with(csrf())
+                    .param("name", "")
+                    .param("sku", "SKU-123") // sku not updated through edit form
+                    .param("reorderThreshold", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("items/item-form"))
+                .andExpect(model().attributeExists("item"))
+                .andExpect(model().attributeExists("itemDetails"))
+                .andExpect(model().attributeHasFieldErrors(
+                    "item", 
+                    "name", 
+                    "reorderThreshold"))
+                .andExpect(model().attribute("mode", "edit"));
+            
+            verify(inventoryItemService, never())
+                .updateInventoryItem(any(), any());
+        }
+
+        @Test
+        @WithMockUser(roles = "ADMIN")
+        @DisplayName("should return form with field error when duplicate name")
+        void shouldReturnForm_WhenDuplicateName() throws Exception {
+            
+            doThrow(new DuplicateNameException("Duplicate name"))
+                .when(inventoryItemService)
+                .updateInventoryItem(eq(ITEM_ID), any(InventoryItemForm.class));
+
+            when(inventoryItemService.getItemDetails(ITEM_ID))
+                .thenReturn(mock(InventoryItemDetailsView.class));
+
+            mockMvc.perform(post("/items/{itemId}/edit", ITEM_ID)
+                    .with(csrf())
+                    .param("name", "Duplicate")
+                    .param("sku", "SKU-123")
+                    .param("reorderThreshold", "5"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("items/item-form"))
+                .andExpect(model().attributeExists("itemDetails"))
+                .andExpect(model().attributeHasFieldErrors("item", "name"))
+                .andExpect(model().attribute("mode", "edit"));
+
+            verify(inventoryItemService)
+                .updateInventoryItem(eq(ITEM_ID), any(InventoryItemForm.class));
+        }
+    }
+
+
+    // POST items/{id}/movements (USER and ADMIN)
+    @Nested
+    @DisplayName("POST /items/{id}/movements - Add movement")
+    class AddInventoryMovement {
+
+        @Test
+        @DisplayName("should redirect to login when unauthenticated")
+        void shouldRedirectToLogin_WhenUnauthenticated() throws Exception {
+
+            mockMvc.perform(post("/items/{id}/movements", ITEM_ID)
+                    .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+            verifyNoInteractions(inventoryMovementService);
+            verifyNoInteractions(inventoryItemService);
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should add movement and redirect when form is valid")
+        void shouldAddMovementAndRedirect_WhenValid() throws Exception {
+
+            mockMvc.perform(post("/items/{id}/movements", ITEM_ID)
+                    .with(csrf())
+                    .param("quantity", "5")
+                    .param("movementType", "RECEIVE")
+                    .param("movementDate", "2025-01-01"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/items/" + ITEM_ID));
+
+            verify(inventoryMovementService)
+                .addInventoryMovement(eq(ITEM_ID), any(InventoryMovementForm.class));
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should return item details view when validation fails")
+        void shouldReturnItemDetails_WhenValidationFails() throws Exception {
+
+            when(inventoryItemService.getItemDetails(ITEM_ID))
+                .thenReturn(mock(InventoryItemDetailsView.class));
+
+            when(inventoryMovementService.getMovementsForItem(eq(ITEM_ID), anyInt()))
+                .thenReturn(Page.empty());
+
+            mockMvc.perform(post("/items/{id}/movements", ITEM_ID)
+                    .with(csrf())
+                    .param("quantity", "")  // invalid
+                    .param("movementType", "RECEIVE")
+                    .param("movementDate", "2025-01-01"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("items/item-details"))
+                .andExpect(model().attributeExists("itemDetails"))
+                .andExpect(model().attributeExists("movementHistory"))
+                .andExpect(model().attributeExists("movementPagination"))
+                .andExpect(model().attributeExists("movementTypes"))
+                .andExpect(model().attributeHasFieldErrors("movementForm", "quantity"));
+
+            verify(inventoryMovementService, never())
+                .addInventoryMovement(any(), any());
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should return item details view with field error when insufficient stock")
+        void shouldReturnItemDetails_WhenInsufficientStock() throws Exception {
+
+            doThrow(new InsufficientStockException(1L, -5))
+                .when(inventoryMovementService)
+                .addInventoryMovement(eq(ITEM_ID), any(InventoryMovementForm.class));
+
+            when(inventoryItemService.getItemDetails(ITEM_ID))
+                .thenReturn(mock(InventoryItemDetailsView.class));
+
+            when(inventoryMovementService.getMovementsForItem(eq(ITEM_ID), anyInt()))
+                .thenReturn(Page.empty());
+
+            mockMvc.perform(post("/items/{id}/movements", ITEM_ID)
+                    .with(csrf())
+                    .param("quantity", "5")
+                    .param("movementType", "SALE")
+                    .param("movementDate", "2025-01-01"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("items/item-details"))
+                .andExpect(model().attributeExists("itemDetails"))
+                .andExpect(model().attributeExists("movementHistory"))
+                .andExpect(model().attributeExists("movementPagination"))
+                .andExpect(model().attributeExists("movementTypes"))
+                .andExpect(model().attributeHasFieldErrors("movementForm", "quantity"));
+
+            verify(inventoryMovementService)
+                .addInventoryMovement(eq(ITEM_ID), any(InventoryMovementForm.class));
+        }
+
+        @Test
+        @WithMockUser(roles = "USER")
+        @DisplayName("should redirect to dashboard when item is inactive")
+        void shouldRedirectToDashboard_WhenInactiveItem() throws Exception {
+
+            doThrow(new InactiveItemException("Item inactive"))
+                .when(inventoryMovementService)
+                .addInventoryMovement(eq(ITEM_ID), any(InventoryMovementForm.class));
+
+            mockMvc.perform(post("/items/{id}/movements", ITEM_ID)
+                    .with(csrf())
+                    .param("quantity", "5")
+                    .param("movementType", "RECEIVE")
+                    .param("movementDate", "2025-01-01"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/dashboard"))
+                .andExpect(flash().attributeExists("errorMessage"));
+
+            verify(inventoryMovementService)
+                .addInventoryMovement(eq(ITEM_ID), any(InventoryMovementForm.class));
+        }
+    }
 }

@@ -91,5 +91,4 @@ class UserTest {
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Role cannot be null");
 	}
-
 }

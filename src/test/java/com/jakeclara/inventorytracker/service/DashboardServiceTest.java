@@ -22,6 +22,8 @@ import java.util.List;
 @ExtendWith(MockitoExtension.class)
 class DashboardServiceTest {
 
+	private static final int DEFAULT_PAGE_SIZE = 10;
+
 	@Mock
 	private InventoryItemRepository inventoryItemRepository;
 
@@ -31,7 +33,6 @@ class DashboardServiceTest {
 	@Test
 	@DisplayName("getInventoryDashboard returns dashboard view with repository data")
 	void getInventoryDashboard_ReturnsDashboardView() {
-
 		// Arrange
 		InventoryDashboardItem item =
 			new InventoryDashboardItem(
@@ -44,10 +45,10 @@ class DashboardServiceTest {
 			);
 
 		Page<InventoryDashboardItem> page =
-			new PageImpl<>(List.of(item), PageRequest.of(0, 10), 1);
+			new PageImpl<>(List.of(item), PageRequest.of(0, DEFAULT_PAGE_SIZE), 1);
 
 		when(inventoryItemRepository
-			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, DEFAULT_PAGE_SIZE)))
 			.thenReturn(page);
 
 		when(inventoryItemRepository.countLowStockByActiveStatus(true))
@@ -68,7 +69,7 @@ class DashboardServiceTest {
 
 
 		verify(inventoryItemRepository)
-			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10));
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, DEFAULT_PAGE_SIZE));
 
 		verify(inventoryItemRepository)
 			.countLowStockByActiveStatus(true);
@@ -77,13 +78,12 @@ class DashboardServiceTest {
 	@Test
 	@DisplayName("getInventoryDashboard clamps negative page number to zero")
 	void getInventoryDashboard_ClampsNegativePageToZero() {
-
 		// Arrange
 		Page<InventoryDashboardItem> page =
-			new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+			new PageImpl<>(List.of(), PageRequest.of(0, DEFAULT_PAGE_SIZE), 0);
 
 		when(inventoryItemRepository
-			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, DEFAULT_PAGE_SIZE)))
 			.thenReturn(page);
 
 		when(inventoryItemRepository.countLowStockByActiveStatus(true))
@@ -97,26 +97,28 @@ class DashboardServiceTest {
 		assertThat(result.pagination().currentPage()).isZero();
 
 		verify(inventoryItemRepository)
-			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10));
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, DEFAULT_PAGE_SIZE));
 	}
 
 	@Test
 	@DisplayName("getInventoryDashboard returns empty dashboard when no items found")
 	void getInventoryDashboard_ReturnsEmptyDashboard_WhenNoItemsFound() {
-
+		// Arrange
 		Page<InventoryDashboardItem> page =
-			new PageImpl<>(List.of(), PageRequest.of(0, 10), 0);
+			new PageImpl<>(List.of(), PageRequest.of(0, DEFAULT_PAGE_SIZE), 0);
 
 		when(inventoryItemRepository
-			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, 10)))
+			.findInventoryByActiveStatusWithQuantity(true, PageRequest.of(0, DEFAULT_PAGE_SIZE)))
 			.thenReturn(page);
 
 		when(inventoryItemRepository.countLowStockByActiveStatus(true))
 			.thenReturn(0L);
 
+		// Act
 		InventoryDashboardView result =
 			dashboardService.getInventoryDashboard(0);
 
+		// Assert
 		assertThat(result.inventoryItems()).isEmpty();
 		assertThat(result.lowStockCount()).isZero();
 	}

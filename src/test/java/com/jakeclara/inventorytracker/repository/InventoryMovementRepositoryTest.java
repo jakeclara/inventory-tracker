@@ -33,12 +33,17 @@ class InventoryMovementRepositoryTest {
     @Test
     @DisplayName("findByItemIdOrderByMovementDateDesc returns empty list when no movements exist for given item ID")
     void findByItemIdOrderByMovementDateDesc_ReturnsEmptyList_WhenNoMovementsExist() {
+        // Arrange
         Long nonexistentItemId = 999L;
+        
+        // Act
         Page<InventoryMovement> page = 
             inventoryMovementRepository.findByItemIdOrderByMovementDateDesc(
                 nonexistentItemId,
                 PageRequest.of(0, 10)
             );
+        
+        // Assert
         assertThat(page).isEmpty();
         assertThat(page.getTotalElements()).isZero();
     }
@@ -46,7 +51,6 @@ class InventoryMovementRepositoryTest {
     @Test
     @DisplayName("findByItemIdOrderByMovementDateDesc returns movements ordered by date descending")
     void findByItemIdOrderByMovementDateDesc_ReturnsMovementsOrderedByDateDesc() {
-        
         // Arrange
         User user = entityManager.persist(TestUserFactory.createDefaultUser());
         InventoryItem itemA = entityManager.persist(TestInventoryItemFactory.createDefaultItem());

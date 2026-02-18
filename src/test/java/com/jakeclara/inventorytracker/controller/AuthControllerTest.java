@@ -21,6 +21,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("GET /login should return the login view")
     void login_ShouldReturnLoginView() throws Exception {
+        
         mockMvc.perform(get("/login"))
             .andExpect(status().isOk())
             .andExpect(view().name("login"));

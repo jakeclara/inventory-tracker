@@ -460,6 +460,7 @@ class InventoryItemServiceTest {
 	@Test
 	@DisplayName("getInactiveItems should default to page 0 when negative page provided")
 	void getInactiveItems_ShouldDefaultToZero_WhenNegativePageProvided() {
+		// Arrange
 		when(inventoryItemRepository
 			.findInventoryByActiveStatusWithQuantity(eq(false), any(PageRequest.class)))
 			.thenReturn(Page.empty());
@@ -467,6 +468,7 @@ class InventoryItemServiceTest {
 		when(inventoryItemRepository.countLowStockByActiveStatus(false))
 			.thenReturn(0L);
 
+		// Act
 		inventoryItemService.getInactiveItems(-5);
 
 		ArgumentCaptor<PageRequest> pageCaptor =
@@ -475,6 +477,7 @@ class InventoryItemServiceTest {
 		verify(inventoryItemRepository)
 			.findInventoryByActiveStatusWithQuantity(eq(false), pageCaptor.capture());
 
+		// Assert
 		assertThat(pageCaptor.getValue().getPageNumber()).isZero();
 	}
 }
