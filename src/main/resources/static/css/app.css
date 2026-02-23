@@ -3,6 +3,7 @@
     --color-graphite: #2c2c2c;
     --color-light-gray: #dee2e6;
     --color-muted-danger: #b92736;
+    --color-charcoal: #42494c;
     --color-white: #ffffff;
     --color-black: #000000;
 
@@ -27,6 +28,8 @@
 
 
     --table-border-radius: 0.25rem;
+
+    --form-label-mb: 0.25rem;
 }
 
 body {
@@ -172,4 +175,11 @@ p {
 .low-stock-indicator {
     color: var(--color-muted-danger);
     font-weight: var(--fw-medium);
+}
+
+.form-text-soft {
+    color: var(--color-charcoal);
+    font-weight: var(--fw-medium);
+    font-size: var(--text-base);
+    margin-bottom: var(--form-label-mb);
 }

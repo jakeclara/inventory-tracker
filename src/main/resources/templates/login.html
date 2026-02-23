@@ -1,33 +1,66 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
+
+<head th:replace="~{fragments/head :: head('Login')}"></head>
+
 <body>
-    <h2>Login</h2>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <form th:action="@{/login}" method="post">
-        <div>
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username" />
+    <div class="container mt-5">
+        
+        <div class="text-center">
+            <h1>Login</h1>
+        </div>
+        
+        <div class="login-card-wrapper col-12 col-sm-8 col-md-6 col-lg-4 mx-auto mt-4">
+            
+            <div class="card shadow p-4">    
+                <form th:action="@{/login}" method="post">
+                    <div class="form-group mb-3">
+                        <label for="username" class="form-text-soft">
+                            <i class="bi bi-person"></i>
+                            Username
+                        </label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            name="username" 
+                            id="username"
+                            autocomplete="username"
+                            autofocus 
+                            required/>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="password" class="form-text-soft">
+                            <i class="bi bi-lock"></i>
+                            Password
+                        </label>
+                        <input 
+                            type="password" 
+                            class="form-control" 
+                            name="password" 
+                            id="password"
+                            autocomplete="current-password"
+                            required/>
+                    </div>
+
+                    <div th:if="${param.error}" class="text-danger fw-bold mb-2">
+                        Invalid username or password
+                    </div>
+
+                    <div th:if="${param.logout}" class="text-success fw-bold mb-2">
+                        You have been logged out
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-2 w-100 fw-bold">Login</button>
+
+                </form>
+            </div>
+
         </div>
 
-        <div>
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password" />
-        </div>
+    </div>
 
-        <button type="submit">Log in</button>
-
-        <div th:if="${param.error}">
-            Invalid username or password
-        </div>
-
-        <div th:if="${param.logout}">
-            You have been logged out
-        </div>
-    </form>
 </body>
 </html>
