@@ -1,61 +1,67 @@
 <!DOCTYPE html>
-<html 
-    lang="en" 
-    xmlns:th="http://www.thymeleaf.org"
-    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head th:replace="~{fragments/head :: head('Inventory Dashboard')}"></head>
+
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
+
     <div th:if="${errorMessage}" class="alert alert-danger mt-3">
         <span th:text="${errorMessage}"></span>
     </div>
+
     <div class="container mt-5 px-3">
         <h1>Inventory Dashboard</h1>
         <p th:if="${#lists.isEmpty(dashboard.inventoryItems)}">No inventory items found</p>
         <p>
             Low stock items:
-            <strong th:text="${dashboard.lowStockCount}"></strong>
+            <strong th:text="${dashboard.lowStockCount}"
+                th:classappend="${dashboard.lowStockCount > 0} ? ' text-danger'"></strong>
         </p>
+
+
+        <div class="table-responsive app-table-wrapper">
+            <table th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>SKU</th>
+                        <th>Quantity</th>
+                        <th>Unit</th>
+                        <th>Reorder Threshold</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${dashboard.inventoryItems}">
+
+                        <td th:text="${item.name}"></td>
+                        <td th:text="${item.sku}"></td>
+
+                        <td>
+                            <span th:text="${item.currentQuantity}"
+                                th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
+                        </td>
+
+                        <td th:text="${item.unit}"></td>
+                        <td th:text="${item.reorderThreshold}"></td>
+
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/items/{id}(id=${item.id})}">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">
+        </div>
+
+        <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
-    <div class="container table-responsive app-table-wrapper">
-        <table 
-            th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" 
-            class="table table-striped align-middle">
-            <thead>
-                <tr>
-                <th>Name</th>
-                <th>SKU</th>
-                <th>Quantity</th>
-                <th>Unit</th>
-                <th>Reorder Threshold</th>
-                <th></th>
-                </tr>
-            </thead>
 
-            <tbody>
-                <tr th:each="item : ${dashboard.inventoryItems}">
-
-                <td th:text="${item.name}"></td>
-                <td th:text="${item.sku}"></td>
-
-                <td>
-                    <span th:text="${item.currentQuantity}" th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
-                </td>
-
-                <td th:text="${item.unit}"></td>
-                <td th:text="${item.reorderThreshold}"></td>
-
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-primary"
-                    th:href="@{/items/{id}(id=${item.id})}">
-                    View
-                    </a>
-                </td>
-                </tr>
-            </tbody>
-        </table>
-        <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}"></div>
-    </div>
-    <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
+
 </html>
