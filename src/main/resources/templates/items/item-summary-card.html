@@ -1,0 +1,52 @@
+<div th:fragment="item-summary-card(itemDetails)" class="card app-card">
+
+    <div class="card-header app-header app-header--primary">
+        Item Summary
+    </div>
+
+    <div class="card-body">
+
+        <div class="row mb-2 pb-2 border-bottom">
+
+            <div class="col border-end">
+                <div class="label-text-soft">Current Quantity:</div>
+
+                <div class="metric-row">
+                    <span th:text="${itemDetails.currentQuantity}" class="app-metric-value"></span>
+                    <span th:text="${itemDetails.unit}" class="app-metric-unit"></span>
+                </div>
+
+                <div th:if="${itemDetails.lowStock}" class="low-stock-indicator mt-1">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Low Stock
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="label-text-soft">Reorder Threshold:</div>
+
+                <div class="metric-row">
+                    <span th:text="${itemDetails.reorderThreshold}" class="app-metric-value"></span>
+                    <span th:text="${itemDetails.unit}" class="app-metric-unit"></span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row pb-2">
+
+            <div class="col">
+                <div class="label-text-soft">Status:</div>
+
+                <div class="metric-row mt-2">
+                    <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}" class="app-pill"
+                        th:classappend="${itemDetails.isActive} ? ' app-pill--success' : ' app-pill--danger'">
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

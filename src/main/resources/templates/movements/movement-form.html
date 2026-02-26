@@ -1,61 +1,61 @@
-<div th:fragment="movement-form">
-    <h2>Add Movement</h2>
+<div th:fragment="movement-form" class="card app-card">
 
-    <form th:action="@{/items/{id}/movements(id=${itemDetails.id})}"
-          th:object="${movementForm}"
-          method="post">
+    <div class="card-header app-header app-header--secondary">
+        Add Movement
+    </div>
 
-        <div>
-            <label for="movementType">Type</label>
-            <select id="movementType" 
-                    th:field="*{movementType}" 
-                    class="form-control"
+    <div class="card-body">
+
+        <form th:action="@{/items/{id}/movements(id=${itemDetails.id})}" th:object="${movementForm}" method="post">
+
+            <div class="form-group mb-3">
+                <label for="movementType" class="label-text-soft">Type</label>
+                <select id="movementType" th:field="*{movementType}" class="form-control"
                     th:classappend="${#fields.hasErrors('movementType')} ? 'is-invalid'">
-                <option value="" disabled selected>Select type</option>
-                <option th:each="type : ${movementTypes}"
-                        th:value="${type}"
-                        th:text="${type}">
-                </option>
-            </select>
-        </div>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('movementType')}" th:errors="*{movementType}"></div>
-        <div>
-            <label for="quantity">Quantity</label>
-            <input type="number"
-                    id="quantity" 
-                    th:field="*{quantity}" 
-                    class="form-control"
-                    th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'" />
-        </div>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
-        <div>
-            <label for="movementDate">Date</label>
-            <input type="date" 
-                    id="movementDate" 
-                    th:field="*{movementDate}" 
-                    class="form-control"
-                    th:classappend="${#fields.hasErrors('movementDate')} ? 'is-invalid'" />
-        </div>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('movementDate')}" th:errors="*{movementDate}"></div>
-        <div>
-            <label for="reference">Reference</label>
-            <input type="text" 
-                    id="reference" 
-                    th:field="*{reference}" 
-                    class="form-control"
-                    th:classappend="${#fields.hasErrors('reference')} ? 'is-invalid'" />
-        </div>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('reference')}" th:errors="*{reference}"></div>
-        <div>
-            <label for="note">Note</label>
-            <input type="text" 
-                    id="note" 
-                    th:field="*{note}" 
-                    class="form-control"
-                    th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'" />
-        </div>
-        <div class="invalid-feedback" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></div>
+                    <option value="" disabled selected>Select type</option>
+                    <option th:each="type : ${movementTypes}" th:value="${type}" th:text="${type}">
+                    </option>
+                </select>
+            </div>
 
-        <button type="submit">Add Movement</button>
-    </form>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('movementType')}" th:errors="*{movementType}">
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="quantity" class="label-text-soft">Quantity</label>
+                <input type="number" id="quantity" th:field="*{quantity}" class="form-control"
+                    th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'" />
+            </div>
+
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
+            
+            <div class="form-group mb-3">
+                <label for="movementDate" class="label-text-soft">Date</label>
+                <input type="date" id="movementDate" th:field="*{movementDate}" class="form-control"
+                    th:classappend="${#fields.hasErrors('movementDate')} ? 'is-invalid'" />
+            </div>
+
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('movementDate')}" th:errors="*{movementDate}">
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="reference" class="label-text-soft">Reference</label>
+                <input type="text" id="reference" th:field="*{reference}" class="form-control"
+                    th:classappend="${#fields.hasErrors('reference')} ? 'is-invalid'" />
+            </div>
+
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('reference')}" th:errors="*{reference}"></div>
+            
+            <div class="form-group mb-3">
+                <label for="note" class="label-text-soft">Note</label>
+                <input type="text" id="note" th:field="*{note}" class="form-control"
+                    th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'" />
+            </div>
+
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('note')}" th:errors="*{note}"></div>
+
+            <button type="submit" class="btn btn-primary">Add Movement</button>
+        </form>
+
+    </div>
 </div>
