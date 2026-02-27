@@ -16,6 +16,15 @@ public class GlobalExceptionHandler {
             return "redirect:/dashboard";
         }
     
+    @ExceptionHandler(UnauthorizedMovementTypeException.class)
+        public String handleUnauthorizedMovementType(
+                UnauthorizedMovementTypeException ex,
+                RedirectAttributes redirectAttributes
+        ) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/dashboard";
+        }
+    
     @ExceptionHandler(ResourceNotFoundException.class)
         public String handleResourceNotFoundException(
             ResourceNotFoundException ex,

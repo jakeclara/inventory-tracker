@@ -10,7 +10,7 @@
         <span th:text="${errorMessage}"></span>
     </div>
 
-    <div class="container mt-5 px-3">
+    <div class="container container--constrained mt-5 px-3">
         <h1>Inventory Dashboard</h1>
         <p th:if="${#lists.isEmpty(dashboard.inventoryItems)}">No inventory items found</p>
         <p>

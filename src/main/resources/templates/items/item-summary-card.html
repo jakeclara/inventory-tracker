@@ -9,7 +9,7 @@
         <div class="row mb-2 pb-2 border-bottom">
 
             <div class="col border-end">
-                <div class="label-text-soft">Current Quantity:</div>
+                <div class="label-text-soft">Current Quantity</div>
 
                 <div class="metric-row">
                     <span th:text="${itemDetails.currentQuantity}" class="app-metric-value"></span>
@@ -23,7 +23,7 @@
             </div>
 
             <div class="col">
-                <div class="label-text-soft">Reorder Threshold:</div>
+                <div class="label-text-soft">Reorder Threshold</div>
 
                 <div class="metric-row">
                     <span th:text="${itemDetails.reorderThreshold}" class="app-metric-value"></span>
@@ -36,7 +36,7 @@
         <div class="row pb-2">
 
             <div class="col">
-                <div class="label-text-soft">Status:</div>
+                <div class="label-text-soft">Status</div>
 
                 <div class="metric-row mt-2">
                     <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}" class="app-pill"

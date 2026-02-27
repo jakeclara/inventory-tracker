@@ -1,7 +1,9 @@
 package com.jakeclara.inventorytracker.service;
 
 import com.jakeclara.inventorytracker.model.User;
+import com.jakeclara.inventorytracker.model.UserRole;
 
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,8 +13,10 @@ import com.jakeclara.inventorytracker.dto.InventoryMovementForm;
 import com.jakeclara.inventorytracker.dto.InventoryMovementView;
 import com.jakeclara.inventorytracker.exception.InactiveItemException;
 import com.jakeclara.inventorytracker.exception.InsufficientStockException;
+import com.jakeclara.inventorytracker.exception.UnauthorizedMovementTypeException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
+import com.jakeclara.inventorytracker.model.InventoryMovementType;
 import com.jakeclara.inventorytracker.repository.InventoryMovementRepository;
 import com.jakeclara.inventorytracker.security.AuthenticatedUserProvider;
 
@@ -44,6 +48,12 @@ public class InventoryMovementService {
         
         if (!inventoryItem.isActive()) {
             throw new InactiveItemException("Cannot add movement: Item " + inventoryItem.getName() + " is inactive.");
+        }
+
+        List<InventoryMovementType> allowedTypes = getAllowedMovementTypes();
+
+        if (!allowedTypes.contains(form.movementType())) {
+            throw new UnauthorizedMovementTypeException("Unauthorized movement type: " + form.movementType());
         }
 
         ensureSufficientStock(itemId, form.movementType().apply(form.quantity()));
@@ -90,4 +100,14 @@ public class InventoryMovementService {
         }
     }
 
+    public List<InventoryMovementType> getAllowedMovementTypes() {
+        User currentUser = authenticatedUserProvider.getAuthenticatedUser();
+        boolean isAdmin = currentUser.getRole() == UserRole.ADMIN;
+
+        if (isAdmin) {
+            return List.of(InventoryMovementType.values());
+        } else {
+            return List.of(InventoryMovementType.SALE, InventoryMovementType.RECEIVE);
+        }   
+    }
 }

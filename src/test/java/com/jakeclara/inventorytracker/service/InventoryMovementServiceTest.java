@@ -5,10 +5,12 @@ import com.jakeclara.inventorytracker.dto.InventoryMovementView;
 import com.jakeclara.inventorytracker.exception.InactiveItemException;
 import com.jakeclara.inventorytracker.exception.InsufficientStockException;
 import com.jakeclara.inventorytracker.exception.ResourceNotFoundException;
+import com.jakeclara.inventorytracker.exception.UnauthorizedMovementTypeException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
 import com.jakeclara.inventorytracker.model.InventoryMovement;
 import com.jakeclara.inventorytracker.model.InventoryMovementType;
 import com.jakeclara.inventorytracker.model.User;
+import com.jakeclara.inventorytracker.model.UserRole;
 import com.jakeclara.inventorytracker.repository.InventoryMovementRepository;
 import com.jakeclara.inventorytracker.security.AuthenticatedUserProvider;
 import com.jakeclara.inventorytracker.util.TestInventoryItemFactory;
@@ -21,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -28,6 +31,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.t;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,7 +121,7 @@ class InventoryMovementServiceTest {
 		assertThat(movement.getNote()).isEqualTo(form.note());
 
 		verify(inventoryItemService).getInventoryItemById(id);
-		verify(authenticatedUserProvider).getAuthenticatedUser();
+		verify(authenticatedUserProvider, times(2)).getAuthenticatedUser();
 	}
 
 	@Test
@@ -164,7 +168,7 @@ class InventoryMovementServiceTest {
 		assertThat(movement.getNote()).isNull();
 
 		verify(inventoryItemService).getInventoryItemById(id);
-		verify(authenticatedUserProvider).getAuthenticatedUser();
+		verify(authenticatedUserProvider, times(2)).getAuthenticatedUser();
 	}
 
 	@Test
@@ -175,6 +179,8 @@ class InventoryMovementServiceTest {
 		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
 		ReflectionTestUtils.setField(item, "id", id);
 		item.setIsActive(true);
+
+		User user = TestUserFactory.createDefaultUser();
 
 		InventoryMovementForm form =  new InventoryMovementForm(
 			10, 
@@ -187,6 +193,9 @@ class InventoryMovementServiceTest {
 		when(inventoryItemService.getInventoryItemById(id))
 			.thenReturn(item);
 		
+		when(authenticatedUserProvider.getAuthenticatedUser())
+			.thenReturn(user);
+
 		// Stock is 5 and movement asks for -10
 		when(inventoryItemService.getCurrentQuantity(id))
 			.thenReturn(5L);
@@ -198,7 +207,6 @@ class InventoryMovementServiceTest {
 		verify(inventoryItemService).getInventoryItemById(id);
 		verify(inventoryItemService).getCurrentQuantity(id);
 
-		verifyNoInteractions(authenticatedUserProvider);
 		verifyNoInteractions(inventoryMovementRepository);
 	}
 
@@ -246,6 +254,40 @@ class InventoryMovementServiceTest {
 		verify(inventoryItemService).getInventoryItemById(id);
 		verifyNoInteractions(inventoryMovementRepository);
 		verifyNoInteractions(authenticatedUserProvider);
+	}
+
+	@Test
+	@DisplayName("addInventoryMovement should throw UnauthorizedMovementTypeException when movement type is not allowed")
+	void addInventoryMovement_ShouldThrow_WhenTypeIsUnauthorized() {
+		// Arrange
+		Long id = 1L;
+		InventoryItem item = TestInventoryItemFactory.createDefaultItem();
+		ReflectionTestUtils.setField(item, "id", id);
+		item.setIsActive(true);
+
+		User nonAdminUser = new User("username", "password", UserRole.USER);
+		
+		InventoryMovementForm form =  new InventoryMovementForm(
+			10, 
+			InventoryMovementType.ADJUST_IN, // restricted type for non-admins
+			LocalDate.now(), 
+			null, 
+			null
+		);
+		
+		when(inventoryItemService.getInventoryItemById(id))
+			.thenReturn(item);
+		
+		when(authenticatedUserProvider.getAuthenticatedUser())
+			.thenReturn(nonAdminUser);
+
+		// Act & Assert
+		assertThatThrownBy(() -> inventoryMovementService.addInventoryMovement(id, form))
+			.isInstanceOf(UnauthorizedMovementTypeException.class);
+		
+		verify(inventoryItemService).getInventoryItemById(id);
+    	verify(inventoryItemService, never()).getCurrentQuantity(any());
+    	verify(inventoryMovementRepository, never()).save(any());
 	}
 
 	@Test
@@ -383,5 +425,47 @@ class InventoryMovementServiceTest {
 			.hasMessageContaining("requested quantity is -10");
 
 		verify(inventoryItemService).getCurrentQuantity(itemId);
+	}
+
+	@Test
+	@DisplayName("getAllowedMovementTypes should return all types for ADMIN")
+	void getAllowedMovementTypes_ShouldReturnAllTypes_WhenAdmin() {
+		// Arrange
+		User admin = new User("username", "password", UserRole.ADMIN);
+		when(authenticatedUserProvider.getAuthenticatedUser())
+			.thenReturn(admin);
+
+		// Act
+		List<InventoryMovementType> result =
+			inventoryMovementService.getAllowedMovementTypes();
+
+		// Assert
+		assertThat(result)
+			.containsExactlyInAnyOrder(InventoryMovementType.values());
+
+		verify(authenticatedUserProvider).getAuthenticatedUser();
+	}
+
+	@Test
+	@DisplayName("getAllowedMovementTypes should return SALE and RECEIVE for non-admin user")
+	void getAllowedMovementTypes_ShouldReturnLimitedTypes_WhenUserIsNotAdmin() {
+		// Arrange
+		User user = new User("username", "password", UserRole.USER);
+
+		when(authenticatedUserProvider.getAuthenticatedUser())
+			.thenReturn(user);
+
+		// Act
+		List<InventoryMovementType> result =
+			inventoryMovementService.getAllowedMovementTypes();
+
+		// Assert
+		assertThat(result)
+			.containsExactlyInAnyOrder(
+				InventoryMovementType.SALE,
+				InventoryMovementType.RECEIVE
+			);
+
+		verify(authenticatedUserProvider).getAuthenticatedUser();
 	}
 }

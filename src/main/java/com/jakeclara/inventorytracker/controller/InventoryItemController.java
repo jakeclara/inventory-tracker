@@ -13,7 +13,6 @@ import com.jakeclara.inventorytracker.exception.DuplicateNameException;
 import com.jakeclara.inventorytracker.exception.DuplicateSkuException;
 import com.jakeclara.inventorytracker.exception.InsufficientStockException;
 import com.jakeclara.inventorytracker.model.InventoryItem;
-import com.jakeclara.inventorytracker.model.InventoryMovementType;
 import com.jakeclara.inventorytracker.service.InventoryItemService;
 import com.jakeclara.inventorytracker.service.InventoryMovementService;
 
@@ -177,7 +176,6 @@ public class InventoryItemController {
         Page<InventoryMovementView> inventoryMovementsPage = inventoryMovementService.getMovementsForItem(itemId, page);
         model.addAttribute("movementHistory", inventoryMovementsPage.getContent());
         model.addAttribute("movementPagination", Pagination.from(inventoryMovementsPage));
-        model.addAttribute("movementTypes", InventoryMovementType.values());
+        model.addAttribute("movementTypes", inventoryMovementService.getAllowedMovementTypes());
     }
-    
 }

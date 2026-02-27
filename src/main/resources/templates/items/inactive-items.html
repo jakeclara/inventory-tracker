@@ -6,14 +6,20 @@
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="container mt-5 px-3">
+    <div class="container container--constrained mt-5 px-3">
+
+        <div class="mb-2">
+            <a th:href="@{/dashboard}" class="app-link-subtle">
+                ← Back to Dashboard
+            </a>
+        </div>
+
         <h1>Inactive Items</h1>
         <p th:if="${#lists.isEmpty(inactiveItems.inventoryItems)}">No inactive items found</p>
 
-
         <div class="table-responsive app-table-wrapper">
             <table th:if="${!#lists.isEmpty(inactiveItems.inventoryItems)}" class="table table-striped align-middle">
-                <thead>
+                <thead class="app-header app-header--primary">
                     <tr>
                         <th>Name</th>
                         <th>SKU</th>
