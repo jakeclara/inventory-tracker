@@ -40,17 +40,16 @@ VALUES
 
 INSERT into inventory_movement (inventory_item_id, quantity, movement_type, movement_date, reference, note, created_by)
 VALUES
-(1, 50, 'RECEIVE', DATE '2024-01-10', 'invoice 2', 'note for item 1', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 3', 'note for item 2', 2),
-(2, 20, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
+(1, 50, 'RECEIVE', DATE '2024-01-10', 'invoice 1', 'note for item 1', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 2', 'note for item 2', 2),
+(2, 20, 'RECEIVE', DATE '2024-01-11', 'invoice 3', 'note for item 2', 1),
 (2, 10, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 10, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 20, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 40, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
-(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 4', 'note for item 2', 1),
+(2, 10, 'RECEIVE', DATE '2024-01-11', 'invoice 5', 'note for item 2', 1),
+(2, 20, 'RECEIVE', DATE '2024-01-11', 'invoice 6', 'note for item 2', 1),
+(2, 40, 'RECEIVE', DATE '2024-01-11', 'invoice 7', 'note for item 2', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 8', 'note for item 2', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 9', 'note for item 2', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 10', 'note for item 2', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 11', 'note for item 2', 1),
+(2, 30, 'RECEIVE', DATE '2024-01-11', 'invoice 12', 'note for item 2', 1),
 (1, 5, 'SALE', DATE '2024-01-12', 'sale invoice 5', 'note for sale of item 1', 1);

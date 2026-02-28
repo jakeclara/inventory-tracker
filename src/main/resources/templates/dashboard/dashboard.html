@@ -6,7 +6,7 @@
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div th:if="${errorMessage}" class="alert alert-danger mt-3">
+    <div th:if="${errorMessage}" class="alert alert-danger mt-3 text-center w-50 mx-auto">
         <span th:text="${errorMessage}"></span>
     </div>
 
@@ -24,14 +24,16 @@
                         th:classappend="${dashboard.lowStockCount > 0} ? ' text-danger'"></strong>
                 </p>
             </div>
+
             <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-2">
-                <a th:href="@{/items/add}" class="btn btn-primary">Add Item</a>
+                <a th:href="@{/items/new}" class="btn btn-primary">Add Item</a>
 
                 <a th:href="@{/items/inactive}" class="btn btn-outline-secondary">View Inactive</a>
             </div>
         </div>
 
         <div class="table-responsive app-table-wrapper">
+
             <table th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" class="table table-striped align-middle">
                 <thead class="app-header app-header--primary">
                     <tr>
@@ -65,6 +67,7 @@
                     </tr>
                 </tbody>
             </table>
+
         </div>
 
         <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">

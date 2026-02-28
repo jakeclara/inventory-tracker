@@ -20,6 +20,7 @@
         </div>
 
         <div class="table-responsive app-table-wrapper">
+
             <table th:if="${!#lists.isEmpty(inactiveItems.inventoryItems)}" class="table table-striped align-middle">
                 <thead class="app-header app-header--primary">
                     <tr>
@@ -54,7 +55,9 @@
                     </tr>
                 </tbody>
             </table>
+
         </div>
+
         <div
             th:replace="~{fragments/pagination :: appPagination(${inactiveItems.pagination}, '/items/inactive', null)}">
         </div>

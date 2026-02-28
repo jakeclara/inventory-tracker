@@ -1,4 +1,6 @@
+/* Tokens */
 :root {
+    /* Colors */
     --color-primary: #044ff1;
     --color-primary-dark: #0348DD;
     --color-primary-darker: #0342C9;
@@ -11,6 +13,7 @@
     --color-white: #ffffff;
     --color-black: #000000;
 
+    /* Typography */
     --font-sans: system-ui, -apple-system, BlinkMacSystemFont,
                  "Segoe UI", Roboto, "Helvetica Neue",
                  Arial, sans-serif;
@@ -31,15 +34,17 @@
     --h2-font-size: var(--text-2xl);
     --p-font-size: var(--text-base);
 
+    /* Layout */
+    --container-max-width: 1100px;
 
+    /* Spacing & Styling */
     --table-border-radius: 0.25rem;
-
     --header-padding-y: 0.75rem;
     --table-content-padding-x: 1.5rem;
-
     --label-mb: 0.25rem;
 }
 
+/* Global Styles */
 html {
     scroll-behavior: smooth;
 }
@@ -61,6 +66,7 @@ p {
     font-size: var(--p-font-size);
 }
 
+/* Navbar */
 .logo {
     width: 26px;
     height: 26px;
@@ -88,6 +94,7 @@ p {
     box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.6);
 }
 
+/* Buttons (Bootstrap extensions) */
 .btn-primary {
   --bs-btn-bg: var(--color-primary);
   --bs-btn-border-color: var(--color-primary);
@@ -134,16 +141,15 @@ p {
   --bs-btn-focus-shadow-rgb: 255, 255, 255;
   
   --bs-btn-font-weight: var(--fw-medium);
-}
 
-.btn-primary-invert {
-  transition: transform 0.1s ease-in-out;
+  transition: transform 0.08s ease-out;
 }
 
 .btn-outline-primary-invert:active {
     transform: translateY(1px);
 }
 
+/* Tables & Cards */
 .app-table-wrapper {
     border: 1px solid var(--color-light-gray);
     border-radius: var(--table-border-radius);
@@ -173,7 +179,7 @@ p {
     color: var(--color-graphite);
 }
 
-thead.app-header--primary {
+thead.app-header.app-header--primary {
     --bs-table-bg: var(--color-primary);
     --bs-table-striped-bg: var(--color-primary-dark);
     --bs-table-color: var(--color-white);
@@ -184,18 +190,22 @@ thead.app-header th {
     padding-bottom: var(--header-padding-y);
 }
 
-
 .app-table-wrapper th,
-.app-table-wrapper td {
-    padding-left: var(--table-content-padding-x);
-    padding-right: var(--table-content-padding-x);
-}
-
+.app-table-wrapper td,
 .app-pagination {
     padding-left: var(--table-content-padding-x);
     padding-right: var(--table-content-padding-x);
 }
 
+.app-card {
+    overflow: hidden;
+}
+
+.app-card .card-body {
+    background-color: var(--color-off-white);
+}
+
+/* Links */
 .app-link-subtle {
     text-decoration: none;
     font-weight: var(--fw-medium);
@@ -204,13 +214,23 @@ thead.app-header th {
     transition: opacity 0.15s ease-in-out;
 }
 
+.app-link-action {
+    color: var(--color-primary);
+    transition: color 0.15s ease-in-out;
+}
+
 @media (hover: hover) and (pointer: fine) {
     .app-link-subtle:hover {
         text-decoration: underline;
         opacity: 1.0;
     }
+
+    .app-link-action:hover {
+        color: var(--color-primary-dark);
+    }
 }
 
+/* Components */
 .low-stock-indicator {
     color: var(--color-danger);
     font-weight: var(--fw-medium);
@@ -221,14 +241,6 @@ thead.app-header th {
     font-weight: var(--fw-medium);
     font-size: var(--text-base);
     margin-bottom: var(--label-mb);
-}
-
-.app-card {
-    overflow: hidden;
-}
-
-.app-card .card-body {
-    background-color: var(--color-off-white);
 }
 
 .app-metric-value {
@@ -266,17 +278,7 @@ thead.app-header th {
   border: 1px solid var(--color-danger);
 }
 
+/* Layout */
 .container--constrained {
-    max-width: 1100px;
-}
-
-.app-link-action {
-    color: var(--color-primary);
-    transition: color 0.15s ease-in-out;
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .app-link-action:hover {
-        color: var(--color-primary-dark);
-    }
+    max-width: var(--container-max-width);
 }

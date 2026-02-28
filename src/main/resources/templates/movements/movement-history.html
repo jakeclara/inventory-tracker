@@ -29,7 +29,8 @@
 
     </div>
 
-    <div th:replace="~{fragments/pagination :: appPagination(${movementPagination}, '/items/' + ${itemDetails.id}, 'movement-history')}">
+    <div
+        th:replace="~{fragments/pagination :: appPagination(${movementPagination}, '/items/' + ${itemDetails.id}, 'movement-history')}">
     </div>
 
 </div>
