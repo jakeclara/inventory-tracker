@@ -11,14 +11,25 @@
     </div>
 
     <div class="container container--constrained mt-5 px-3">
-        <h1>Inventory Dashboard</h1>
-        <p th:if="${#lists.isEmpty(dashboard.inventoryItems)}">No inventory items found</p>
-        <p>
-            Low stock items:
-            <strong th:text="${dashboard.lowStockCount}"
-                th:classappend="${dashboard.lowStockCount > 0} ? ' text-danger'"></strong>
-        </p>
 
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1>Inventory Dashboard</h1>
+
+                <p th:if="${#lists.isEmpty(dashboard.inventoryItems)}">No inventory items found</p>
+
+                <p>
+                    Low stock items:
+                    <strong th:text="${dashboard.lowStockCount}"
+                        th:classappend="${dashboard.lowStockCount > 0} ? ' text-danger'"></strong>
+                </p>
+            </div>
+            <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-2">
+                <a th:href="@{/items/add}" class="btn btn-primary">Add Item</a>
+
+                <a th:href="@{/items/inactive}" class="btn btn-outline-secondary">View Inactive</a>
+            </div>
+        </div>
 
         <div class="table-responsive app-table-wrapper">
             <table th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" class="table table-striped align-middle">

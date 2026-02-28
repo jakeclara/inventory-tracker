@@ -14,8 +14,10 @@
             </a>
         </div>
 
-        <h1>Inactive Items</h1>
-        <p th:if="${#lists.isEmpty(inactiveItems.inventoryItems)}">No inactive items found</p>
+        <div class="mb-4">
+            <h1>Inactive Items</h1>
+            <p th:if="${#lists.isEmpty(inactiveItems.inventoryItems)}">No inactive items found</p>
+        </div>
 
         <div class="table-responsive app-table-wrapper">
             <table th:if="${!#lists.isEmpty(inactiveItems.inventoryItems)}" class="table table-striped align-middle">

@@ -1,0 +1,78 @@
+<div th:fragment="item-edit-form" class="card app-card">
+
+    <div class="card-header app-header app-header--primary">
+        Edit Item
+    </div>
+
+    <div class="card-body">
+
+        <form th:action="@{/items/{id}/edit(id=${itemDetails.id})}" th:object="${item}" method="post">
+
+            <!-- SKU is not editable, included as a hidden field so it's submitted with the form -->
+            <input type="hidden" th:field="*{sku}" />
+
+            <div class="form-group mb-3">
+                <label for="editName" class="label-text-soft">Name</label>
+                <input type="text" id="editName" th:field="*{name}" class="form-control"
+                    th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" />
+
+                <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="editReorderThreshold" class="label-text-soft">Reorder Threshold</label>
+                <input type="number" id="editReorderThreshold" th:field="*{reorderThreshold}" class="form-control"
+                    th:classappend="${#fields.hasErrors('reorderThreshold')} ? 'is-invalid'" />
+
+                <div th:if="${#fields.hasErrors('reorderThreshold')}" th:errors="*{reorderThreshold}"
+                    class="text-danger"></div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="editUnit" class="label-text-soft">Unit</label>
+                <input type="text" id="editUnit" th:field="*{unit}" class="form-control"
+                    th:classappend="${#fields.hasErrors('unit')} ? 'is-invalid'" />
+
+                <div th:if="${#fields.hasErrors('unit')}" th:errors="*{unit}" class="text-danger"></div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a th:href="@{/items/{id}(id=${itemDetails.id})}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+
+        </form>
+
+        <div class="mt-4 border-top pt-3">
+            <div class="label-text-soft">Status</div>
+
+            <div class="mt-2">
+
+                <span th:text="${itemDetails.isActive ? 'Active' : 'Inactive'}" class="app-pill"
+                    th:classappend="${itemDetails.isActive} ? ' app-pill--success' : ' app-pill--danger'">
+                </span>
+
+            </div>
+
+            <div class="mt-2">
+                <form th:if="${itemDetails.isActive}" th:action="@{/items/{id}/deactivate(id=${itemDetails.id})}"
+                    method="post">
+
+                    <button type="submit" class="btn btn-link text-danger">Deactivate</button>
+
+                </form>
+
+                <form th:if="${!itemDetails.isActive}" th:action="@{/items/{id}/activate(id=${itemDetails.id})}"
+                    method="post">
+
+                    <button type="submit" class="btn btn-link app-link-action">Activate</button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
