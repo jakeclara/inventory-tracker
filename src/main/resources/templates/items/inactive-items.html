@@ -37,7 +37,7 @@
                     <tr th:each="item : ${inactiveItems.inventoryItems}">
 
                         <td th:text="${item.name}"></td>
-                        <td th:text="${item.sku}"></td>
+                        <td th:text="${item.sku}" class="text-nowrap"></td>
 
                         <td>
                             <span th:text="${item.currentQuantity}"

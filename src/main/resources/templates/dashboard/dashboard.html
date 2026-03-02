@@ -12,7 +12,7 @@
 
     <div class="container container--constrained mt-5 px-3">
 
-        <div class="d-flex justify-content-between align-items-start mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
             <div>
                 <h1>Inventory Dashboard</h1>
 
@@ -49,7 +49,7 @@
                     <tr th:each="item : ${dashboard.inventoryItems}">
 
                         <td th:text="${item.name}"></td>
-                        <td th:text="${item.sku}"></td>
+                        <td th:text="${item.sku}" class="text-nowrap"></td>
 
                         <td>
                             <span th:text="${item.currentQuantity}"

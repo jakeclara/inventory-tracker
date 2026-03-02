@@ -15,8 +15,8 @@
 
     /* Typography */
     --font-sans: system-ui, -apple-system, BlinkMacSystemFont,
-                 "Segoe UI", Roboto, "Helvetica Neue",
-                 Arial, sans-serif;
+        "Segoe UI", Roboto, "Helvetica Neue",
+        Arial, sans-serif;
 
     --fw-medium: 500;
     --fw-semibold: 600;
@@ -96,53 +96,53 @@ p {
 
 /* Buttons (Bootstrap extensions) */
 .btn-primary {
-  --bs-btn-bg: var(--color-primary);
-  --bs-btn-border-color: var(--color-primary);
-  --bs-btn-color: var(--color-white);
+    --bs-btn-bg: var(--color-primary);
+    --bs-btn-border-color: var(--color-primary);
+    --bs-btn-color: var(--color-white);
 
-  --bs-btn-hover-bg: var(--color-primary-dark);
-  --bs-btn-hover-border-color: var(--color-primary-dark);
+    --bs-btn-hover-bg: var(--color-primary-dark);
+    --bs-btn-hover-border-color: var(--color-primary-dark);
 
-  --bs-btn-active-bg: var(--color-primary-darker);
-  --bs-btn-active-border-color: var(--color-primary-darker);
+    --bs-btn-active-bg: var(--color-primary-darker);
+    --bs-btn-active-border-color: var(--color-primary-darker);
 
-  --bs-btn-focus-shadow-rgb: 4, 79, 241;
+    --bs-btn-focus-shadow-rgb: 4, 79, 241;
 
-  --bs-btn-font-weight: var(--fw-bold);
+    --bs-btn-font-weight: var(--fw-bold);
 }
 
 .btn-outline-primary {
-  --bs-btn-bg: transparent;
-  --bs-btn-border-color: var(--color-primary);
-  --bs-btn-color: var(--color-primary);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--color-primary);
+    --bs-btn-color: var(--color-primary);
 
-  --bs-btn-hover-bg: var(--color-primary);
-  --bs-btn-hover-border-color: var(--color-primary);
+    --bs-btn-hover-bg: var(--color-primary);
+    --bs-btn-hover-border-color: var(--color-primary);
 
-  --bs-btn-active-bg: var(--color-primary-dark);
-  --bs-btn-active-border-color: var(--color-primary-dark);
+    --bs-btn-active-bg: var(--color-primary-dark);
+    --bs-btn-active-border-color: var(--color-primary-dark);
 
-  --bs-btn-focus-shadow-rgb: 255, 255, 255;
+    --bs-btn-focus-shadow-rgb: 255, 255, 255;
 }
 
 .btn-outline-primary-invert {
-  --bs-btn-bg: var(--color-primary);
-  --bs-btn-border-color: var(--color-white);
-  --bs-btn-color: var(--color-white);
+    --bs-btn-bg: var(--color-primary);
+    --bs-btn-border-color: var(--color-white);
+    --bs-btn-color: var(--color-white);
 
-  --bs-btn-hover-bg: var(--color-white);
-  --bs-btn-hover-border-color: var(--color-white);
-  --bs-btn-hover-color: var(--color-primary);
+    --bs-btn-hover-bg: var(--color-white);
+    --bs-btn-hover-border-color: var(--color-white);
+    --bs-btn-hover-color: var(--color-primary);
 
-  --bs-btn-active-bg: var(--color-primary);
-  --bs-btn-active-border-color: var(--color-white);
-  --bs-btn-active-color: var(--color-white);
+    --bs-btn-active-bg: var(--color-primary);
+    --bs-btn-active-border-color: var(--color-white);
+    --bs-btn-active-color: var(--color-white);
 
-  --bs-btn-focus-shadow-rgb: 255, 255, 255;
-  
-  --bs-btn-font-weight: var(--fw-medium);
+    --bs-btn-focus-shadow-rgb: 255, 255, 255;
 
-  transition: transform 0.08s ease-out;
+    --bs-btn-font-weight: var(--fw-medium);
+
+    transition: transform 0.08s ease-out;
 }
 
 .btn-outline-primary-invert:active {
@@ -156,6 +156,7 @@ p {
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
 .app-table-wrapper table {
     border-collapse: collapse;
     width: 100%;
@@ -267,18 +268,31 @@ thead.app-header th {
 }
 
 .app-pill--success {
-  background: transparent;
-  color: var(--color-success);
-  border: 1px solid var(--color-success);
+    background: transparent;
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
 }
 
 .app-pill--danger {
-  background: transparent;
-  color: var(--color-danger);
-  border: 1px solid var(--color-danger);
+    background: transparent;
+    color: var(--color-danger);
+    border: 1px solid var(--color-danger);
 }
 
 /* Layout */
 .container--constrained {
     max-width: var(--container-max-width);
+}
+
+@media (max-width: 768px) {
+
+    /* Navbar */
+    .logo {
+        width: 22px;
+        height: 22px;
+    }
+
+    .app-navbar .navbar-brand {
+        font-size: var(--text-lg);
+    }
 }
