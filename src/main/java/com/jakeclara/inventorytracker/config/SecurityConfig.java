@@ -19,6 +19,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/css/**", "/icons/**").permitAll()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(
                     "/items/new",
                     "/items/*/deactivate",
