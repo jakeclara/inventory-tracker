@@ -32,48 +32,91 @@
             </div>
         </div>
 
-        <div class="table-responsive app-table-wrapper">
+        <div class="d-none d-md-block">
+            <div class="table-responsive app-table-wrapper">
 
-            <table th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" class="table table-striped align-middle">
-                <thead class="app-header app-header--primary">
-                    <tr>
-                        <th>Name</th>
-                        <th>SKU</th>
-                        <th>Quantity</th>
-                        <th>Unit</th>
-                        <th>Reorder Threshold</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="item : ${dashboard.inventoryItems}">
+                <table th:if="${!#lists.isEmpty(dashboard.inventoryItems)}" class="table table-striped align-middle">
+                    <thead class="app-header app-header--primary">
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Reorder Threshold</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${dashboard.inventoryItems}">
 
-                        <td th:text="${item.name}"></td>
-                        <td th:text="${item.sku}" class="text-nowrap"></td>
+                            <td th:text="${item.name}"></td>
+                            <td th:text="${item.sku}" class="text-nowrap"></td>
 
-                        <td>
-                            <span th:text="${item.currentQuantity}"
-                                th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
-                        </td>
+                            <td>
+                                <span th:text="${item.currentQuantity}"
+                                    th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
+                            </td>
 
-                        <td th:text="${item.unit}"></td>
-                        <td th:text="${item.reorderThreshold}"></td>
+                            <td th:text="${item.unit}"></td>
+                            <td th:text="${item.reorderThreshold}"></td>
 
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-primary" th:href="@{/items/{id}(id=${item.id})}">
-                                View
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" th:href="@{/items/{id}(id=${item.id})}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
+            </div>
         </div>
 
-        <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">
+        <div class="d-block d-md-none">
+            <div class="row">
+
+                <div th:each="item : ${dashboard.inventoryItems}" class="mb-3 col-12 col-sm-10">
+
+                    <div class="card shadow-sm app-card ">
+                        <div class="card-body">
+
+                            <h2 th:text="${item.name}" class="mb-0">Item Name</h2>
+
+                            <div th:text="${item.sku}" class="label-text-soft mb-1">SKU</div>
+
+                            <div class="mb-2">
+                                <span th:text="${item.currentQuantity}" class="app-metric-value"></span>
+                                <span th:text="${item.unit}" class="app-metric-unit"></span>
+
+                                <div th:if="${item.lowStock}" class="low-stock-indicator mt-1">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Low Stock
+                                </div>
+                            </div>
+
+                            <div th:text="|Reorder Threshold: ${item.reorderThreshold}|" class="label-text-soft mb-1">
+                                Reorder
+                                Threshold</div>
+
+                            <div class="text-end">
+                                <a class="btn btn-sm btn-primary" th:href="@{/items/{id}(id=${item.id})}">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
         </div>
 
-        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+
+    <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
 
 </body>

@@ -9,7 +9,7 @@
         <div sec:authorize="isAuthenticated()">
 
             <ul class="navbar-nav ms-auto align-items-center flex-row">
-                <li class="nav-item me-2 me-md-3">
+                <li class="nav-item me-3">
                     <span class="navbar-text" th:text="${#strings.capitalize(#authentication.name)}"></span>
                 </li>
                 <li class="nav-item">
