@@ -19,42 +19,51 @@
             <p th:if="${#lists.isEmpty(inactiveItems.inventoryItems)}">No inactive items found</p>
         </div>
 
-        <div class="table-responsive app-table-wrapper">
+        <div class="d-none d-md-block">
+            <div class="table-responsive app-table-wrapper">
 
-            <table th:if="${!#lists.isEmpty(inactiveItems.inventoryItems)}" class="table table-striped align-middle">
-                <thead class="app-header app-header--primary">
-                    <tr>
-                        <th>Name</th>
-                        <th>SKU</th>
-                        <th>Quantity</th>
-                        <th>Unit</th>
-                        <th>Reorder Threshold</th>
-                        <th></th>
-                    </tr>
-                </thead>
+                <table th:if="${!#lists.isEmpty(inactiveItems.inventoryItems)}"
+                    class="table table-striped align-middle">
+                    <thead class="app-header app-header--primary">
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Quantity</th>
+                            <th>Unit</th>
+                            <th>Reorder Threshold</th>
+                            <th></th>
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    <tr th:each="item : ${inactiveItems.inventoryItems}">
+                    <tbody>
+                        <tr th:each="item : ${inactiveItems.inventoryItems}">
 
-                        <td th:text="${item.name}"></td>
-                        <td th:text="${item.sku}" class="text-nowrap"></td>
+                            <td th:text="${item.name}"></td>
+                            <td th:text="${item.sku}" class="text-nowrap"></td>
 
-                        <td>
-                            <span th:text="${item.currentQuantity}"
-                                th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
-                        </td>
+                            <td>
+                                <span th:text="${item.currentQuantity}"
+                                    th:classappend="${item.lowStock} ? ' low-stock-indicator' : ''"></span>
+                            </td>
 
-                        <td th:text="${item.unit}"></td>
-                        <td th:text="${item.reorderThreshold}"></td>
+                            <td th:text="${item.unit}"></td>
+                            <td th:text="${item.reorderThreshold}"></td>
 
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-primary" th:href="@{/items/{id}(id=${item.id})}">
-                                View
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary" th:href="@{/items/{id}(id=${item.id})}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <div class="d-block d-md-none">
+
+            <div th:replace="~{items/item-mobile-card :: item-mobile-card(${inactiveItems.inventoryItems})}"></div>
 
         </div>
 
@@ -62,8 +71,10 @@
             th:replace="~{fragments/pagination :: appPagination(${inactiveItems.pagination}, '/items/inactive', null)}">
         </div>
 
-        <div th:replace="~{fragments/footer :: footer}"></div>
     </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
 </body>
 
 </html>

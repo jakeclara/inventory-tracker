@@ -6,8 +6,10 @@
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div th:if="${errorMessage}" class="alert alert-danger mt-3 text-center w-50 mx-auto">
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mt-3 text-center w-50 mx-auto"
+        role="alert">
         <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <div class="container container--constrained mt-5 px-3">
@@ -73,51 +75,19 @@
         </div>
 
         <div class="d-block d-md-none">
-            <div class="row">
 
-                <div th:each="item : ${dashboard.inventoryItems}" class="mb-3 col-12 col-sm-10">
+            <div th:replace="~{items/item-mobile-card :: item-mobile-card(${dashboard.inventoryItems})}"></div>
 
-                    <div class="card shadow-sm app-card ">
-                        <div class="card-body">
+        </div>
 
-                            <h2 th:text="${item.name}" class="mb-0">Item Name</h2>
 
-                            <div th:text="${item.sku}" class="label-text-soft mb-1">SKU</div>
 
-                            <div class="mb-2">
-                                <span th:text="${item.currentQuantity}" class="app-metric-value"></span>
-                                <span th:text="${item.unit}" class="app-metric-unit"></span>
-
-                                <div th:if="${item.lowStock}" class="low-stock-indicator mt-1">
-                                    <i class="bi bi-exclamation-triangle"></i>
-                                    Low Stock
-                                </div>
-                            </div>
-
-                            <div th:text="|Reorder Threshold: ${item.reorderThreshold}|" class="label-text-soft mb-1">
-                                Reorder
-                                Threshold</div>
-
-                            <div class="text-end">
-                                <a class="btn btn-sm btn-primary" th:href="@{/items/{id}(id=${item.id})}">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
+        <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">
         </div>
 
     </div>
 
-    <div th:replace="~{fragments/pagination :: appPagination(${dashboard.pagination}, '/dashboard', null)}">
-    </div>
-
     <div th:replace="~{fragments/footer :: footer}"></div>
-    </div>
 
 </body>
 

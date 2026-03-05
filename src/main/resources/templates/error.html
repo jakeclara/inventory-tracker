@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Error')}"></head>
+
+<body>
+
+    <div class="container py-5">
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+
+                <h1 class="display-5 mb-3">Something went wrong</h1>
+
+                <p class="lead">
+                    Sorry, an unexpected error occurred.
+                </p>
+
+                <a th:href="@{/}" class="btn btn-primary">
+                    Return to Dashboard
+                </a>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>
