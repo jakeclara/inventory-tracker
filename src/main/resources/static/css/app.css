@@ -232,6 +232,11 @@ thead.app-header th {
 }
 
 /* Components */
+.text-soft {
+    color: var(--color-charcoal);
+    font-weight: var(--fw-medium);
+}
+
 .low-stock-indicator {
     color: var(--color-danger);
     font-weight: var(--fw-medium);

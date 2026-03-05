@@ -4,29 +4,59 @@
 
     <p th:if="${#lists.isEmpty(movementHistory)}">No movements found for this item.</p>
 
-    <div class="table-responsive app-table-wrapper">
+    <div class="d-none d-md-block">
+        <div class="table-responsive app-table-wrapper">
 
-        <table th:if="${!#lists.isEmpty(movementHistory)}" class="table table-striped align-middle">
-            <thead class="app-header app-header--primary">
-                <tr>
-                    <th>Type</th>
-                    <th>Quantity</th>
-                    <th>Date</th>
-                    <th>Reference</th>
-                    <th>Created By</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="movement : ${movementHistory}">
-                    <td th:text="${movement.movementType}">Type</td>
-                    <td th:text="${movement.quantity}">Quantity</td>
-                    <td th:text="${movement.movementDate}">Date</td>
-                    <td th:text="${movement.reference}">Reference</td>
-                    <td th:text="${movement.createdBy}">Created By</td>
-                </tr>
-            </tbody>
-        </table>
+            <table th:if="${!#lists.isEmpty(movementHistory)}" class="table table-striped align-middle">
+                <thead class="app-header app-header--primary">
+                    <tr>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Date</th>
+                        <th>Reference</th>
+                        <th>Created By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="movement : ${movementHistory}">
+                        <td th:text="${movement.movementType}">Type</td>
+                        <td th:text="${movement.quantity}">Quantity</td>
+                        <td th:text="${movement.movementDate}">Date</td>
+                        <td th:text="${movement.reference}">Reference</td>
+                        <td th:text="${movement.createdBy}">Created By</td>
+                    </tr>
+                </tbody>
+            </table>
 
+        </div>
+    </div>
+
+    <!-- Mobile View -->
+    <div class="d-block d-md-none">
+        <div th:each="movement : ${movementHistory}" class="mb-3 col-12 col-sm-10">
+
+            <div class="card shadow-sm app-card">
+                <div class="card-body">
+
+                    <span th:text="|Qty: ${movement.quantity}|" class="app-metric-value mb-1">Quantity</span>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span th:text="${#temporals.format(movement.movementDate, 'MMM d, yyyy')}"
+                                class="text-soft">Date</span>
+                            <span th:text="|by ${#strings.capitalize(movement.createdBy)}|"
+                                class="text-soft ms-2">Created By</span>
+                        </div>
+
+                        <span th:text="${movement.movementType}"
+                            th:classappend="${movement.movementType.name() == 'RECEIVE' or movement.movementType.name() == 'ADJUST_IN'} ? 'badge text-bg-success' : 'badge text-bg-danger'">
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <div
